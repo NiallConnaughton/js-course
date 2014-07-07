@@ -1,0 +1,35 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="calculator.css"></link>
+	<script type="text/javascript" src="Calculator.js"></script>
+</head>
+<body>
+	<div class="display" id="resultBox">
+		0
+	</div>
+	<div class="clearfix buttonRow">
+		<div class="numberButton" onclick="addDigit(7)">7</div>
+		<div class="numberButton" onclick="addDigit(8)">8</div>
+		<div class="numberButton" onclick="addDigit(9)">9</div>
+		<div class="operatorButton" onclick="operatorSelected('+')">+</div>
+	</div>
+	<div class="clearfix buttonRow">
+		<div class="numberButton" onclick="addDigit(4)">4</div>
+		<div class="numberButton" onclick="addDigit(5)">5</div>
+		<div class="numberButton" onclick="addDigit(6)">6</div>
+		<div class="operatorButton" onclick="operatorSelected('-')">-</div>
+	</div>
+	<div class="clearfix buttonRow">
+		<div class="numberButton" onclick="addDigit(1)">1</div>
+		<div class="numberButton" onclick="addDigit(2)">2</div>
+		<div class="numberButton" onclick="addDigit(3)">3</div>
+		<div class="operatorButton" onclick="operatorSelected('*')">*</div>
+	</div>
+	<div class="clearfix buttonRow">
+		<div class="numberButton" onclick="addDigit(0)">0</div>
+		<div class="numberButton" onclick="addDigit('.')">.</div>
+		<div class="operatorButton" onclick="operatorSelected('/')">/</div>
+		<div class="operatorButton" onclick="equalsSelected()">=</div>
+	</div>
+</body>
+</html>
