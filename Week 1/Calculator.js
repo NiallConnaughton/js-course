@@ -19,6 +19,7 @@ function addDigit(d) {
 	currentNumber = Number(currentNumberText);
 
 	document.getElementById("resultBox").value = currentNumber;
+	
 	console.log(currentNumber);
 }
 
