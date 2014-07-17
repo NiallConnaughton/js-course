@@ -1,7 +1,25 @@
 pre {text-indent: 30px} 
 
+#content {
+	max-width: 1024px;
+}
+
+.header {
+	display: inline-flex;
+}
+
+#burgerImg, #lobsterImg, #burgerLobsterImg {
+	max-width: 200px;
+}
+
+#homeContent {
+	display: inline-flex;
+	width: auto;
+}
+
 #map-canvas {
 	height: 100%;
+	max-height: 600px;
 }
 
 #tabmenu { 

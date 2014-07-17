@@ -1,5 +1,3 @@
-$('div#content').append('<h1>Burger & Lobster</h1>');
-
 $('div#content').append([
 	'<ul id="tabmenu">',
 		'<li onclick="makeactive(1)"><a class="" id="tab1">Home</a></li>',
@@ -9,12 +7,13 @@ $('div#content').append([
 	'<div id="tabContent"></div>'].join('\n'));
 
 var homeContent = [
-		'<br/>',
-		'<img src="http://www.cherwell.org/library/image/byron-burger_4358.jpg" style="max-width:300"/>',
+		'<div id="homeContent">',
+		'<img id ="burgerImg" src="http://www.cherwell.org/library/image/byron-burger_4358.jpg"/>',
 		'<h1>+</h1>',
-		'<img src="http://bennydoro.com/chef/files/2011/07/IMG_9655-1024x683-584x389.jpg" style="max-width:300"/>',
+		'<img id ="lobsterImg" src="http://bennydoro.com/chef/files/2011/07/IMG_9655-1024x683-584x389.jpg"/>',
 		'<h1>=</h1>',
-		'<img src="http://www.rocketandsquash.com/wp-content/uploads/2012/01/Burger-and-Lobster1.jpg" style="max-width:300"/>'];
+		'<img id ="burgerLobsterImg" src="http://www.rocketandsquash.com/wp-content/uploads/2012/01/Burger-and-Lobster1.jpg"/>',
+		'</div>'].join('\n');
 
 var menuContent = [
 		'<p>Menu</p>',
@@ -42,17 +41,40 @@ function makeactive(tab) {
 	else if (tab === 3)
 	{
 		$('div#tabContent').append(locationContent);
-		initialize();
+		initializeMap();
 	}
 }
 
 var map;
-function initialize() {
+var geocoder;
+function initializeMap() {
   var mapOptions = {
-    zoom: 8,
-    center: new google.maps.LatLng(-34.397, 150.644)
+    zoom: 14,
+    center: new google.maps.LatLng(51.512, -0.127)
   };
   map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  geocoder = new google.maps.Geocoder();
+
+  addMarker('W1J 7EF', 'Burger & Lobster Mayfair');
+  addMarker('W1D 4PS', 'Burger & Lobster Soho');
+  addMarker('EC1M 4AY', 'Burger & Lobster Farringdon');
+  addMarker('EC4M 9BE', 'Burger & Lobster City');
+  addMarker('SW1X 7RJ', 'Burger & Lobster Knightsbridge');
+  addMarker('W1W 7JE', 'Burger & Lobster Fitzrovia');
 }
 
+function addMarker(postcode, label) {
+	geocoder.geocode( { 'address': postcode },
+		function(results, status) {
+		    if (status == google.maps.GeocoderStatus.OK) {
+		      var marker = new google.maps.Marker({
+		          map: map,
+		          position: results[0].geometry.location,
+		          title: label
+		      });
+			}
+		});
+}
+
+makeactive(1);
 // google.maps.event.addDomListener(window, 'load', initialize);
