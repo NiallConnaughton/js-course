@@ -10,11 +10,12 @@ pre {text-indent: 30px}
 
 #burgerImg, #lobsterImg, #burgerLobsterImg {
 	max-width: 200px;
+	max-height: 250px;
 }
 
 #homeContent {
 	display: inline-flex;
-	width: auto;
+	/*width: auto;*/
 }
 
 #map-canvas {
