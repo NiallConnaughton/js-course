@@ -11,7 +11,7 @@ for (var i = 0; i < 40; i++) {
 	grid.push(row);
 }
 
-grid[20][20] = 'O';
+// grid[20][20] = 'O';
 
 function render(grid) {
 	var content = [];
@@ -20,7 +20,6 @@ function render(grid) {
 		var row = grid[rowIndex];
 		for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
 			var cell = row[cellIndex];
-			// debugger;
 			content.push('<div class="cell">' + cell + '</div>');
 		}
 	}
@@ -29,7 +28,28 @@ function render(grid) {
 	$('#content').html(renderedContent);
 }
 
+var directions = ['l', 'u', 'r', 'd'];
+var snake = {
+	direction: 2, // right
+	position: [20,20]
+}
+
+grid[snake.position[0]][snake.position[1]] = 'O';
+
 render(grid);
+
+var left = 37, right = 39;
+$('body').keydown(function(eventData) {
+	switch (eventData.which){
+		case left:
+			snake.direction = (snake.direction - 1 + 4) % 4;
+			break;
+		case right:
+			snake.direction = (snake.direction + 1) % 4;
+			break;
+	}
+	console.log(directions[snake.direction]);
+});
 
 // alert('done');
 
