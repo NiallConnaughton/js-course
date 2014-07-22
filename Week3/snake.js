@@ -1,20 +1,25 @@
-// alert('initialising');
-
-// debugger;
-
+var left = 37, right = 39;
 var grid = [];
-for (var i = 0; i < 40; i++) {
-	var row = [];
-	for (var j = 0; j < 40; j++) {
-		row.push('&nbsp;');
-	}
-	grid.push(row);
-}
+var directions = ['l', 'u', 'r', 'd'];
+var snake = {
+	direction: 2, // right,
+	position: [20,20]
+};
 
-// grid[20][20] = 'O';
+function initializeGrid() {
+	for (var i = 0; i < 40; i++) {
+		var row = [];
+		for (var j = 0; j < 40; j++) {
+			row.push('&nbsp;');
+		}
+		grid.push(row);
+	}
+}
 
 function render(grid) {
 	var content = [];
+
+	grid[snake.position[0]][snake.position[1]] = 'O';
 
 	for (var rowIndex = 0; rowIndex < grid.length; rowIndex++) {
 		var row = grid[rowIndex];
@@ -28,18 +33,7 @@ function render(grid) {
 	$('#content').html(renderedContent);
 }
 
-var directions = ['l', 'u', 'r', 'd'];
-var snake = {
-	direction: 2, // right
-	position: [20,20]
-}
-
-grid[snake.position[0]][snake.position[1]] = 'O';
-
-render(grid);
-
-var left = 37, right = 39;
-$('body').keydown(function(eventData) {
+function handleKeyDown(eventData) {
 	switch (eventData.which){
 		case left:
 			snake.direction = (snake.direction - 1 + 4) % 4;
@@ -48,8 +42,34 @@ $('body').keydown(function(eventData) {
 			snake.direction = (snake.direction + 1) % 4;
 			break;
 	}
-	console.log(directions[snake.direction]);
-});
+}
 
-// alert('done');
+function updatePosition() {
+	var currentDirection = directions[snake.direction];
+	switch (currentDirection) {
+		case 'l':
+			snake.position[0]--;
+			break;
+		case 'u':
+			snake.position[1]--;
+			break;
+		case 'r':
+			snake.position[0]++;
+			break;
+		case 'd':
+			snake.position[1]++;
+			break;
+	}
 
+	snake.position[0] = (snake.position[0] + 40) % 40;
+	snake.position[1] = (snake.position[1] + 40) % 40;
+
+	render();
+
+	console.log(snake.position + ' ' + directions[snake.direction]);
+}
+
+initializeGrid();
+render(grid);
+$('body').keydown(handleKeyDown);
+window.setInterval(updatePosition, 1000);
