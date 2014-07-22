@@ -6,6 +6,7 @@ var snake = {
 	segments: [ { x: 20, y: 20 }, { x: 19, y: 20 } ]
 };
 var refreshInterval = 100;
+var gameInterval;
 
 function initializeGrid() {
 	for (var i = 0; i < 40; i++) {
@@ -71,24 +72,61 @@ function updatePosition() {
 	newHead.y = (newHead.y + 40) % 40;
 
 	snake.segments.unshift(newHead);
-	var oldTail = snake.segments.pop();
+
+	var newHeadCellValue = getGridValue(newHead);
 
 	setGridSquare(newHead, 'O');
-	setGridSquare(oldTail, ' ');
-	// grid[newHead.y][newHead.x] = 'O';
-	// grid[oldTail.y][oldTail.x] = ' '
+
+	// If the snake moves into an empty square, remove its old tail.
+	// If it eats som food, replace the food we just ate with a new one.
+	// If it hits itself, the game is over.
+	switch (newHeadCellValue) {
+		case ' ':
+			var oldTail = snake.segments.pop();
+			setGridSquare(oldTail, ' ');
+			break;
+
+		case '@':
+			addFood();
+			break;
+
+		case 'O':
+			gameOver();
+			break;
+	}
 
 	render();
 
 	// console.log([newHead.x, newHead.y, directions[snake.direction]].join(', '));
 }
 
-function setGridSquare(position, value)
-{
+function setGridSquare(position, value) {
 	grid[position.y][position.x] = value;
 }
 
+function getGridValue(position) {
+	return grid[position.y][position.x];
+}
+
+function addFood() {
+	var x = Math.floor(Math.random() * 40);
+	var y = Math.floor(Math.random() * 40);
+	var position =  { x: x, y: y };
+	setGridSquare(position, '@');
+}
+
+function gameOver() {
+	window.clearInterval(gameInterval);
+	$('#content').addClass('gameOver');
+	$('body').off('keydown');
+}
+
 initializeGrid();
+
+for (var i = 0; i < 3; i++) {
+	addFood();
+}
+
 render();
 $('body').keydown(handleKeyDown);
-window.setInterval(updatePosition, refreshInterval);
+gameInterval = window.setInterval(updatePosition, refreshInterval);

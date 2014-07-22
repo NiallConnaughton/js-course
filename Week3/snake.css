@@ -11,3 +11,7 @@
 	/*border: 1px solid red;*/
 	clear: both;
 }
+
+.gameOver .cell {
+	background-color: red;
+}
