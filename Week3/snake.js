@@ -3,23 +3,24 @@ var grid = [];
 var directions = ['l', 'u', 'r', 'd'];
 var snake = {
 	direction: 2, // right,
-	position: [20,20]
+	segments: [ { x: 20, y: 20 }, { x: 19, y: 20 } ]
 };
+var refreshInterval = 100;
 
 function initializeGrid() {
 	for (var i = 0; i < 40; i++) {
 		var row = [];
 		for (var j = 0; j < 40; j++) {
-			row.push('&nbsp;');
+			row.push(' ');
 		}
 		grid.push(row);
 	}
+
+	$.each(snake.segments, function(_, segment) { setGridSquare(segment, 'O'); });
 }
 
-function render(grid) {
+function render() {
 	var content = [];
-
-	grid[snake.position[0]][snake.position[1]] = 'O';
 
 	for (var rowIndex = 0; rowIndex < grid.length; rowIndex++) {
 		var row = grid[rowIndex];
@@ -42,34 +43,52 @@ function handleKeyDown(eventData) {
 			snake.direction = (snake.direction + 1) % 4;
 			break;
 	}
+
+	updatePosition();
 }
 
 function updatePosition() {
 	var currentDirection = directions[snake.direction];
+	var newHead = { x: snake.segments[0].x, y: snake.segments[0].y };
+
 	switch (currentDirection) {
 		case 'l':
-			snake.position[0]--;
+			newHead.x--;
 			break;
 		case 'u':
-			snake.position[1]--;
+			newHead.y--;
 			break;
 		case 'r':
-			snake.position[0]++;
+			newHead.x++;
 			break;
 		case 'd':
-			snake.position[1]++;
+			newHead.y++;
 			break;
 	}
 
-	snake.position[0] = (snake.position[0] + 40) % 40;
-	snake.position[1] = (snake.position[1] + 40) % 40;
+	// wrap the snake's head's position so it doesn't wander out of the grid
+	newHead.x = (newHead.x + 40) % 40;
+	newHead.y = (newHead.y + 40) % 40;
+
+	snake.segments.unshift(newHead);
+	var oldTail = snake.segments.pop();
+
+	setGridSquare(newHead, 'O');
+	setGridSquare(oldTail, ' ');
+	// grid[newHead.y][newHead.x] = 'O';
+	// grid[oldTail.y][oldTail.x] = ' '
 
 	render();
 
-	console.log(snake.position + ' ' + directions[snake.direction]);
+	// console.log([newHead.x, newHead.y, directions[snake.direction]].join(', '));
+}
+
+function setGridSquare(position, value)
+{
+	grid[position.y][position.x] = value;
 }
 
 initializeGrid();
-render(grid);
+render();
 $('body').keydown(handleKeyDown);
-window.setInterval(updatePosition, 1000);
+window.setInterval(updatePosition, refreshInterval);
