@@ -1,15 +1,21 @@
 .cell {
-	border: 1px solid #AAAAAA;
+	border-bottom: 1px solid #AAAAAA;
+	border-right: 1px solid #AAAAAA;
 	width: 20px;
 	height: 20px;
 	float: left;
 	margin: 0;
-	border-collapse: collapse;
+}
+
+#content:after {
+  content:"";
+  display:table;
+  clear:both;
 }
 
 .cell:nth-child(40n + 1) {
-	/*border: 1px solid red;*/
 	clear: both;
+	border-left: 1px solid #AAAAAA;
 }
 
 .gameOver .cell {

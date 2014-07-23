@@ -1,4 +1,3 @@
-var left = 37, right = 39;
 var grid = [];
 var directions = ['l', 'u', 'r', 'd'];
 var snake = {
@@ -7,6 +6,7 @@ var snake = {
 };
 var refreshInterval = 100;
 var gameInterval;
+var isPaused = true;
 
 function initializeGrid() {
 	for (var i = 0; i < 40; i++) {
@@ -36,16 +36,31 @@ function render() {
 }
 
 function handleKeyDown(eventData) {
+	var left = 37, right = 39, pause = 'P'.charCodeAt(0);
+	var newDirection = null;
+
 	switch (eventData.which){
 		case left:
-			snake.direction = (snake.direction - 1 + 4) % 4;
+			newDirection = (snake.direction - 1 + 4) % 4;
 			break;
+
 		case right:
-			snake.direction = (snake.direction + 1) % 4;
+			newDirection = (snake.direction + 1) % 4;
+			break;
+
+		case pause:
+			togglePause();
+			break;
+
+		default:
+			console.log('Unrecognised keydown: ' + eventData.which);
 			break;
 	}
 
-	updatePosition();
+	if (newDirection != null && !isPaused) {
+		snake.direction = newDirection;
+		updatePosition();
+	}
 }
 
 function updatePosition() {
@@ -96,8 +111,6 @@ function updatePosition() {
 	}
 
 	render();
-
-	// console.log([newHead.x, newHead.y, directions[snake.direction]].join(', '));
 }
 
 function setGridSquare(position, value) {
@@ -115,8 +128,25 @@ function addFood() {
 	setGridSquare(position, '@');
 }
 
-function gameOver() {
+function startGameClock() {
+	gameInterval = window.setInterval(updatePosition, refreshInterval);
+}
+
+function stopGameClock() {
 	window.clearInterval(gameInterval);
+}
+
+function togglePause() {
+	isPaused = !isPaused;
+
+	if (isPaused)
+		stopGameClock();
+	else
+		startGameClock();
+}
+
+function gameOver() {
+	stopGameClock();
 	$('#content').addClass('gameOver');
 	$('body').off('keydown');
 }
@@ -129,4 +159,4 @@ for (var i = 0; i < 3; i++) {
 
 render();
 $('body').keydown(handleKeyDown);
-gameInterval = window.setInterval(updatePosition, refreshInterval);
+togglePause();
