@@ -1,10 +1,10 @@
 var grid = [];
 var directions = ['l', 'u', 'r', 'd'];
 var snake = {
-	direction: 2, // right,
+	direction: 'r',
 	segments: [ { x: 20, y: 20 }, { x: 19, y: 20 } ]
 };
-var refreshInterval = 400;
+var refreshInterval = 300;
 var gameInterval;
 var isPaused = true;
 var displayGrid = [];
@@ -35,38 +35,37 @@ function render() {
 }
 
 function handleKeyDown(eventData) {
-	var left = 37, right = 39, pause = 'P'.charCodeAt(0);
-	var newDirection = null;
+	var directions = { 37: 'l', 38: 'u', 39: 'r', 40: 'd' };
+	var left = 37, up = 38, right = 39, down = 40;
+	var pause = 'P'.charCodeAt(0);
 
-	switch (eventData.which){
-		case left:
-			newDirection = (snake.direction - 1 + 4) % 4;
-			break;
+	var selectedDirection = directions[eventData.which];
 
-		case right:
-			newDirection = (snake.direction + 1) % 4;
-			break;
+	if (selectedDirection) {
+		var oldAndNew = snake.direction + selectedDirection;
+		var ignoredDirectionChanges = ['lr', 'rl', 'ud', 'du'];
+		console.log(oldAndNew);
+		var isOppositeDirection = $.inArray(oldAndNew, ignoredDirectionChanges) != -1;
+		console.log('Is opposite direction: ' + isOppositeDirection);
 
-		case pause:
-			togglePause();
-			break;
 
-		default:
-			console.log('Unrecognised keydown: ' + eventData.which);
-			break;
+		if (!isPaused && !isOppositeDirection) {
+			snake.direction = selectedDirection;
+			updatePosition();
+		}
 	}
-
-	if (newDirection != null && !isPaused) {
-		snake.direction = newDirection;
-		updatePosition();
+	else if (eventData.which === pause) {
+		togglePause();
+	}
+	else {
+		console.log('Unrecognised keydown: ' + eventData.which);
 	}
 }
 
 function updatePosition() {
-	var currentDirection = directions[snake.direction];
 	var newHead = { x: snake.segments[0].x, y: snake.segments[0].y };
 
-	switch (currentDirection) {
+	switch (snake.direction) {
 		case 'l':
 			newHead.x--;
 			break;
@@ -138,9 +137,13 @@ function stopGameClock() {
 }
 
 function speedUp() {
-	refreshInterval *= 0.9;
-	stopGameClock();
-	startGameClock();
+
+	if (snake.segments.length % 5 === 0) {
+		console.log('speeding up');
+		refreshInterval *= 0.75;
+		stopGameClock();
+		startGameClock();
+	}
 }
 
 function togglePause() {
@@ -164,7 +167,7 @@ initializeGrid();
 
 render();
 
-for (var i = 0; i < 3; i++) {
+for (var i = 0; i < 7; i++) {
 	addFood();
 }
 
