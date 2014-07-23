@@ -4,35 +4,34 @@ var snake = {
 	direction: 2, // right,
 	segments: [ { x: 20, y: 20 }, { x: 19, y: 20 } ]
 };
-var refreshInterval = 100;
+var refreshInterval = 400;
 var gameInterval;
 var isPaused = true;
+var displayGrid = [];
 
 function initializeGrid() {
 	for (var i = 0; i < 40; i++) {
 		var row = [];
 		for (var j = 0; j < 40; j++) {
 			row.push(' ');
+
+			var cellId = getCellId(j, i);
+			displayGrid.push('<div class="cell" id="' + cellId + '"> </div>');
 		}
 		grid.push(row);
 	}
+}
 
-	$.each(snake.segments, function(_, segment) { setGridSquare(segment, 'O'); });
+function getCellId(x, y) {
+	return 'x' + x + 'y' + y;
 }
 
 function render() {
-	var content = [];
+	var renderedContent = displayGrid.join('\n');
 
-	for (var rowIndex = 0; rowIndex < grid.length; rowIndex++) {
-		var row = grid[rowIndex];
-		for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
-			var cell = row[cellIndex];
-			content.push('<div class="cell">' + cell + '</div>');
-		}
-	}
-
-	var renderedContent = content.join('\n');
 	$('#content').html(renderedContent);
+	
+	$.each(snake.segments, function(_, segment) { setGridSquare(segment, 'O'); });
 }
 
 function handleKeyDown(eventData) {
@@ -103,18 +102,20 @@ function updatePosition() {
 
 		case '@':
 			addFood();
+			speedUp();
 			break;
 
 		case 'O':
 			gameOver();
 			break;
 	}
-
-	render();
 }
 
 function setGridSquare(position, value) {
 	grid[position.y][position.x] = value;
+
+	var cellId = getCellId(position.x, position.y);
+	$('#' + cellId).html(value);
 }
 
 function getGridValue(position) {
@@ -136,8 +137,16 @@ function stopGameClock() {
 	window.clearInterval(gameInterval);
 }
 
+function speedUp() {
+	refreshInterval *= 0.9;
+	stopGameClock();
+	startGameClock();
+}
+
 function togglePause() {
 	isPaused = !isPaused;
+
+	console.log('Setting paused to ' + isPaused);
 
 	if (isPaused)
 		stopGameClock();
@@ -153,10 +162,11 @@ function gameOver() {
 
 initializeGrid();
 
+render();
+
 for (var i = 0; i < 3; i++) {
 	addFood();
 }
 
-render();
 $('body').keydown(handleKeyDown);
-togglePause();
+// togglePause();
