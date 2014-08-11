@@ -18,6 +18,16 @@
     text-align: center;
 }
 
+.cellButton:hover {
+    background-color: yellow;
+    width: 100px;
+    height: 100px;
+}
+
+.emptyCell:hover {
+    background-color: yellow;
+}
+
 .cell:nth-child(3n + 1) {
     clear: both;
     border-left: 1px solid #AAAAAA;
