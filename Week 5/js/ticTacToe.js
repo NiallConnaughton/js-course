@@ -40,11 +40,17 @@ function placePiece(x, y, player) {
 	grid[x][y] = player;
 
 	var cellClass = 'player' + player;
+	if (player === PLAYER_1) {
+		// cellClass = 'fa fa-slack';
+		cell.html('<i class="fa fa-slack"/>');
+	}
+	else if (player === PLAYER_2) {
+		// cellClass = 'fa fa-star';
+		cell.html('<i class="fa fa-star"/>');
+		// cell.html('O');
+	}
+
 	cell.addClass(cellClass);
-	if (player === PLAYER_1)
-		cell.html('X');
-	else if (player === PLAYER_2)
-		cell.html('O');
 
 	cell.removeClass('emptyCell');
 
@@ -77,8 +83,6 @@ function checkGameState() {
 		for (var cell = 0; cell < 3; cell++) {
 			sum += consecutiveSet[cell];
 		}
-
-		console.log(sum);
 
 		if (sum === PLAYER_1 * 3) {
 			alert('player 1 win!');
