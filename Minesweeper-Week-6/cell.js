@@ -5,8 +5,9 @@ function Cell(x, y) {
 	this.isBomb = false;
 	this.isFlagged = false;
 	this.neighbourBombs = 0;
+	this.neighbours = [];
 }
 
-function addNeighbourBomb() {
+Cell.prototype.addNeighbourBomb = function() {
 	this.neighbourBombs++;
 }

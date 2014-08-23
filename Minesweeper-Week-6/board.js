@@ -9,13 +9,14 @@ Board.prototype.initializeGrid = function() {
 	for (var i = 0; i < this.size; i++) {
 		var row = [];
 		for (var j = 0; j < this.size; j++) {
-			row.push(new Cell());
+			row.push(new Cell(j, i));
 		}
 		this.cells.push(row);
 	}
 
-	console.log(this.cells[2]);
+	// console.log(this.cells[2]);
 
+	this.initializeNeighbours();
 	this.placeBombs();
 
 	console.log('Grid initialized');
@@ -29,16 +30,26 @@ Board.prototype.placeBombs = function() {
 			var y = Math.floor(Math.random() * this.size);
 
 			var cell = this.cells[x][y];
-			console.log('Cell: ' + cell);
 			if (!cell.isBomb) {
 				cell.isBomb = true;
 				bombPlaced = true;
 
 				// console.log('Bomb at ' + x + ', ' + y);
 
-				var neighbours = this.getNeighbours(cell);
-				console.log(neighbours);
+				cell.neighbours.forEach(function (c) {
+					c.addNeighbourBomb();
+				});
 			}
+		}
+	}
+}
+
+Board.prototype.initializeNeighbours = function() {
+	for (var x = 0; x < this.size; x++) {
+		for (var y = 0; y < this.size; y++) {
+			var cell = this.cells[x][y];
+			var neighbours = this.getNeighbours(cell);
+			cell.neighbours = neighbours;
 		}
 	}
 }
@@ -49,12 +60,10 @@ Board.prototype.getNeighbours = function(cell) {
 
 	var left = Math.max(cell.x - 1, 0);
 	var top = Math.max(cell.y - 1, 0);
-	var right = Math.min(cell.x + 1, this.size);
-	var bottom = Math.min(cell.y - 1, this.size);
+	var right = Math.min(cell.x + 1, this.size - 1);
+	var bottom = Math.min(cell.y + 1, this.size - 1);
 
 	var neighbours = [];
-
-	// console.log(this);
 
 	for (var x = left; x <= right; x++) {
 		for (var y = top; y <= bottom; y++) {
