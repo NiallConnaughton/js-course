@@ -78,3 +78,11 @@ Board.prototype.getNeighbours = function(cell) {
 
 	return neighbours;
 }
+
+Board.prototype.cellHasBomb = function(x, y) {
+	var cell = this.cells[x][y];
+
+	console.log('Cell at ' + x + ', ' + y + ' is bomb: ' + cell.isBomb + ', neighbouring bombs: ' + cell.neighbourBombs);
+
+	return cell.isBomb;
+}

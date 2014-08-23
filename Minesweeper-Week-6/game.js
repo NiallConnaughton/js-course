@@ -12,10 +12,10 @@ Game.prototype.renderBoard = function() {
 	console.log('rendering');
 	var boardDiv = $('#board');
 
-	for (var x = 0; x < 40; x++) {
+	for (var x = 0; x < this.board.size; x++) {
 		var row = [];
 		row.push('<div class="row">');
-		for (var y = 0; y < 40; y++) {
+		for (var y = 0; y < this.board.size; y++) {
 			row.push('<div class="cell selectable" data-x="' + x + '" data-y="' + y + '"> </div>');
 		}
 
@@ -28,17 +28,24 @@ Game.prototype.handleUserInput = function() {
 	window.oncontextmenu = function() { return false; };
 
 	var cells = $('#board').find('.cell');
+	var self = this;
 
 	// handle click events on any of the cells, and place a piece there
 	cells.mousedown(function(e) {
 		var x = $(this).attr('data-x');
 		var y = $(this).attr('data-y');
 
+		console.log(this);
+
 		if (e.button === 0) {
-			// left click
+			if (self.board.cellHasBomb(x, y)) {
+				alert('Game over, man!');
+			}
 		}
 		else if (e.button === 2) {
 			// right click
+			var selector = '[data-x=' + x + '][data-y=' + y + ']';
+			$(selector).toggleClass('flagged');
 		}
 	});
 }

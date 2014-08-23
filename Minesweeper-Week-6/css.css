@@ -46,3 +46,7 @@ body {
     background-color: orange;
     cursor: pointer;
 }
+
+.flagged {
+	background-color: red;
+}
