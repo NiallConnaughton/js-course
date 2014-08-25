@@ -10,4 +10,6 @@ function Cell(x, y) {
 
 Cell.prototype.addNeighbourBomb = function() {
 	this.neighbourBombs++;
+
+	// console.log('Cell at ' + this.x + ', ' + this.y + ' has ' + this.neighbourBombs + ' neighbouring bombs');
 }

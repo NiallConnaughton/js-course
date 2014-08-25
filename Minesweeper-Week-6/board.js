@@ -6,15 +6,13 @@ function Board(size, bombCount) {
 }
 
 Board.prototype.initializeGrid = function() {
-	for (var i = 0; i < this.size; i++) {
+	for (var x = 0; x < this.size; x++) {
 		var row = [];
-		for (var j = 0; j < this.size; j++) {
-			row.push(new Cell(j, i));
+		for (var y = 0; y < this.size; y++) {
+			row.push(new Cell(x, y));
 		}
 		this.cells.push(row);
 	}
-
-	// console.log(this.cells[2]);
 
 	this.initializeNeighbours();
 	this.placeBombs();
@@ -34,7 +32,7 @@ Board.prototype.placeBombs = function() {
 				cell.isBomb = true;
 				bombPlaced = true;
 
-				// console.log('Bomb at ' + x + ', ' + y);
+				console.log('Bomb at ' + x + ', ' + y);
 
 				cell.neighbours.forEach(function (c) {
 					c.addNeighbourBomb();
@@ -82,7 +80,13 @@ Board.prototype.getNeighbours = function(cell) {
 Board.prototype.cellHasBomb = function(x, y) {
 	var cell = this.cells[x][y];
 
-	console.log('Cell at ' + x + ', ' + y + ' is bomb: ' + cell.isBomb + ', neighbouring bombs: ' + cell.neighbourBombs);
+	// console.log('Cell at ' + cell.x + ', ' + cell.y + ' is bomb: ' + cell.isBomb + ', neighbouring bombs: ' + cell.neighbourBombs);
 
 	return cell.isBomb;
+}
+
+Board.prototype.logNeighbours = function(x, y) {
+	this.cells[x][y].neighbours.forEach(function (n) {
+		console.log('neighbour at ' + n.x + ', ' + n.y);
+	});
 }

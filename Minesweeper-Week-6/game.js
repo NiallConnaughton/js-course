@@ -12,10 +12,10 @@ Game.prototype.renderBoard = function() {
 	console.log('rendering');
 	var boardDiv = $('#board');
 
-	for (var x = 0; x < this.board.size; x++) {
+	for (var y = 0; y < this.board.size; y++) {
 		var row = [];
 		row.push('<div class="row">');
-		for (var y = 0; y < this.board.size; y++) {
+		for (var x = 0; x < this.board.size; x++) {
 			row.push('<div class="cell selectable" data-x="' + x + '" data-y="' + y + '"> </div>');
 		}
 
@@ -35,7 +35,7 @@ Game.prototype.handleUserInput = function() {
 		var x = $(this).attr('data-x');
 		var y = $(this).attr('data-y');
 
-		console.log(this);
+		// self.board.logNeighbours(x, y);
 
 		if (e.button === 0) {
 			if (self.board.cellHasBomb(x, y)) {
