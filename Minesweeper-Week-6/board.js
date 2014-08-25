@@ -5,6 +5,11 @@ function Board(size, bombCount) {
 	this.bombCount = bombCount;
 }
 
+Board.prototype.onUpdateCell = function(cell) {
+	// Does nothing - this is for the game to set a callback
+	console.log('Should have a handler for onUpdateCell!');
+}
+
 Board.prototype.initializeGrid = function() {
 	for (var x = 0; x < this.size; x++) {
 		var row = [];
@@ -89,4 +94,15 @@ Board.prototype.logNeighbours = function(x, y) {
 	this.cells[x][y].neighbours.forEach(function (n) {
 		console.log('neighbour at ' + n.x + ', ' + n.y);
 	});
+}
+
+Board.prototype.revealCell = function(x, y) {
+	var cell = this.cells[x][y];
+	this.onUpdateCell(cell);
+}
+
+Board.prototype.flagCell = function(x, y) {
+	var cell = this.cells[x][y];
+	cell.isFlagged = true;
+	this.onUpdateCell(cell);
 }

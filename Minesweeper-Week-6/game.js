@@ -6,6 +6,32 @@ Game.prototype.start = function() {
 	board.initializeGrid();
 	this.renderBoard();
 	this.handleUserInput();
+
+	board.onUpdateCell = this.cellUpdated;
+}
+
+Game.prototype.cellUpdated = function(cell) {
+	// console.log('Updating cell ' + cell);
+
+	var selector = '[data-x=' + cell.x + '][data-y=' + cell.y + ']';
+	var $cell = $(selector);
+
+	$cell.removeClass('selectable');
+
+	if (cell.isBomb) {
+		alert('Game over, man!');
+	}
+	else if (cell.isFlagged) {
+			$cell.toggleClass('flagged');
+	}
+	else {
+		$cell.addClass('revealed');
+
+		if (cell.neighbourBombs > 0) {
+			$cell.addClass('bombs' + cell.neighbourBombs);
+			$cell.html(cell.neighbourBombs);
+		}
+	}
 }
 
 Game.prototype.renderBoard = function() {
@@ -35,30 +61,12 @@ Game.prototype.handleUserInput = function() {
 		var x = $(this).attr('data-x');
 		var y = $(this).attr('data-y');
 
-		// self.board.logNeighbours(x, y);
-
-		var selector = '[data-x=' + x + '][data-y=' + y + ']';
-		var $cell = $(selector);
-
 		if (e.button === 0) {
-			$cell.removeClass('selectable');
-
-			if (self.board.cellHasBomb(x, y)) {
-				alert('Game over, man!');
-			}
-			else {
-				$cell.addClass('revealed');
-
-				var boardCell = self.board.cells[x][y];
-				if (boardCell.neighbourBombs > 0) {
-					$cell.addClass('bombs' + boardCell.neighbourBombs);
-					$cell.html(boardCell.neighbourBombs);
-				}
-			}
+			self.board.revealCell(x, y);
 		}
 		else if (e.button === 2) {
 			// right click
-			$cell.toggleClass('flagged');
+			self.board.flagCell(x, y);
 		}
 	});
 }
