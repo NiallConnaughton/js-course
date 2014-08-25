@@ -37,15 +37,28 @@ Game.prototype.handleUserInput = function() {
 
 		// self.board.logNeighbours(x, y);
 
+		var selector = '[data-x=' + x + '][data-y=' + y + ']';
+		var $cell = $(selector);
+
 		if (e.button === 0) {
+			$cell.removeClass('selectable');
+
 			if (self.board.cellHasBomb(x, y)) {
 				alert('Game over, man!');
+			}
+			else {
+				$cell.addClass('revealed');
+
+				var boardCell = self.board.cells[x][y];
+				if (boardCell.neighbourBombs > 0) {
+					$cell.addClass('bombs' + boardCell.neighbourBombs);
+					$cell.html(boardCell.neighbourBombs);
+				}
 			}
 		}
 		else if (e.button === 2) {
 			// right click
-			var selector = '[data-x=' + x + '][data-y=' + y + ']';
-			$(selector).toggleClass('flagged');
+			$cell.toggleClass('flagged');
 		}
 	});
 }
