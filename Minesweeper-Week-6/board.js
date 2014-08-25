@@ -96,12 +96,28 @@ Board.prototype.logNeighbours = function(x, y) {
 	});
 }
 
-Board.prototype.revealCell = function(x, y) {
+Board.prototype.revealCellAt = function(x, y) {
 	var cell = this.cells[x][y];
-	this.onUpdateCell(cell);
+	this.revealCell(cell, []);
 }
 
-Board.prototype.flagCell = function(x, y) {
+Board.prototype.revealCell = function(cell) {
+	var self = this;
+
+	// if we've already revealed this cell, don't reveal again
+	if (cell.isRevealed) {
+		return;
+	}
+	cell.isRevealed = true;
+
+	this.onUpdateCell(cell);
+
+	if (cell.neighbourBombs === 0) {
+		cell.neighbours.forEach(function (c) { self.revealCell(c); });
+	}
+}
+
+Board.prototype.flagCellAt = function(x, y) {
 	var cell = this.cells[x][y];
 	cell.isFlagged = true;
 	this.onUpdateCell(cell);

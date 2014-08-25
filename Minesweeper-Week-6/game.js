@@ -11,18 +11,20 @@ Game.prototype.start = function() {
 }
 
 Game.prototype.cellUpdated = function(cell) {
-	// console.log('Updating cell ' + cell);
+	//console.log('Updating cell ' + cell);
 
 	var selector = '[data-x=' + cell.x + '][data-y=' + cell.y + ']';
 	var $cell = $(selector);
 
+	// don't want to do this when the update is a cell being flagged or unflagged
 	$cell.removeClass('selectable');
 
+	// console.log(cell);
 	if (cell.isBomb) {
 		alert('Game over, man!');
 	}
 	else if (cell.isFlagged) {
-			$cell.toggleClass('flagged');
+		$cell.toggleClass('flagged');
 	}
 	else {
 		$cell.addClass('revealed');
@@ -62,11 +64,11 @@ Game.prototype.handleUserInput = function() {
 		var y = $(this).attr('data-y');
 
 		if (e.button === 0) {
-			self.board.revealCell(x, y);
+			self.board.revealCellAt(x, y);
 		}
 		else if (e.button === 2) {
 			// right click
-			self.board.flagCell(x, y);
+			self.board.flagCellAt(x, y);
 		}
 	});
 }

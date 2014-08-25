@@ -6,6 +6,7 @@ function Cell(x, y) {
 	this.isFlagged = false;
 	this.neighbourBombs = 0;
 	this.neighbours = [];
+	this.isRevealed = false;
 }
 
 Cell.prototype.addNeighbourBomb = function() {
