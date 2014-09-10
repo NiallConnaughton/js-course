@@ -17,6 +17,9 @@ Game.prototype.gameOver = function(playerWon) {
 	if (!playerWon) {
 		alert('Game over, man!');
 	}
+	else {
+		alert('You win!');
+	}
 }
 
 Game.prototype.cellRevealed = function(cell) {

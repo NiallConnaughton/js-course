@@ -4,6 +4,7 @@ function Board(size, bombCount) {
 	this.size = size;
 	this.bombCount = bombCount;
 	this.bombsRemaining = bombCount;
+	this.cellsRemaining = this.size * this.size;
 }
 
 Board.prototype.onCellRevealed = function(cell) {
@@ -110,6 +111,10 @@ Board.prototype.revealCellAt = function(x, y) {
 		this.revealAllCells();
 		this.onGameOver(false);
 	}
+	else if (this.cellsRemaining === this.bombCount) {
+		this.revealAllCells();
+		this.onGameOver(true);
+	}
 }
 
 Board.prototype.revealCell = function(cell) {
@@ -120,6 +125,7 @@ Board.prototype.revealCell = function(cell) {
 		return;
 	}
 	cell.isRevealed = true;
+	this.cellsRemaining--;
 
 	this.onCellRevealed(cell);
 
