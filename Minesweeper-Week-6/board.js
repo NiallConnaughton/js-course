@@ -87,13 +87,13 @@ Board.prototype.getNeighbours = function(cell) {
 	return neighbours;
 }
 
-Board.prototype.cellHasBomb = function(x, y) {
-	var cell = this.cells[x][y];
+// Board.prototype.cellHasBomb = function(x, y) {
+// 	var cell = this.cells[x][y];
 
-	// console.log('Cell at ' + cell.x + ', ' + cell.y + ' is bomb: ' + cell.isBomb + ', neighbouring bombs: ' + cell.neighbourBombs);
+// 	// console.log('Cell at ' + cell.x + ', ' + cell.y + ' is bomb: ' + cell.isBomb + ', neighbouring bombs: ' + cell.neighbourBombs);
 
-	return cell.isBomb;
-}
+// 	return cell.isBomb;
+// }
 
 Board.prototype.logNeighbours = function(x, y) {
 	this.cells[x][y].neighbours.forEach(function (n) {
@@ -104,6 +104,11 @@ Board.prototype.logNeighbours = function(x, y) {
 Board.prototype.revealCellAt = function(x, y) {
 	var cell = this.cells[x][y];
 	this.revealCell(cell, []);
+
+	if (cell.isBomb) {
+		this.revealAllCells();
+		this.onGameOver(false);
+	}
 }
 
 Board.prototype.revealCell = function(cell) {
@@ -120,6 +125,17 @@ Board.prototype.revealCell = function(cell) {
 	if (cell.neighbourBombs === 0) {
 		cell.neighbours.forEach(function (c) { self.revealCell(c); });
 	}
+}
+
+Board.prototype.revealAllCells = function() {
+	// Seems like this is the window inside the forEach
+	var self = this;
+
+	this.cells.forEach(function (column) {
+		column.forEach(function (cell) {
+			self.revealCell(cell);
+		})
+	})
 }
 
 Board.prototype.toggleCellFlag = function(x, y) {

@@ -9,6 +9,13 @@ Game.prototype.start = function() {
 
 	board.onCellRevealed = this.cellRevealed;
 	board.onCellFlagChanged = this.cellFlagChanged;
+	board.onGameOver = this.gameOver;
+}
+
+Game.prototype.gameOver = function(playerWon) {
+	if (!playerWon) {
+		alert('Game over, man!');
+	}
 }
 
 Game.prototype.cellRevealed = function(cell) {
@@ -18,16 +25,15 @@ Game.prototype.cellRevealed = function(cell) {
 
 
 	$cell.removeClass('selectable');
-	if (cell.isBomb) {
-		alert('Game over, man!');
-	}
-	else {
-		$cell.addClass('revealed');
+	$cell.addClass('revealed');
 
-		if (cell.neighbourBombs > 0) {
-			$cell.addClass('bombs' + cell.neighbourBombs);
-			$cell.html(cell.neighbourBombs);
-		}
+	if (cell.isBomb) {
+		$cell.addClass('bomb');
+		$cell.html('<i class="fa fa-bomb"></i>');
+	}
+	else if (cell.neighbourBombs > 0) {
+		$cell.addClass('bombs' + cell.neighbourBombs);
+		$cell.html(cell.neighbourBombs);
 	}
 }
 

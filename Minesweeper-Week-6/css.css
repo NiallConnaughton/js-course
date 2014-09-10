@@ -45,7 +45,7 @@ body {
     cursor: pointer;
 }
 
-.flagged {
+.flagged, .bomb {
 	color: #FF5555;
 }
 
