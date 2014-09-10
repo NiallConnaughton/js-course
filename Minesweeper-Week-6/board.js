@@ -5,9 +5,14 @@ function Board(size, bombCount) {
 	this.bombCount = bombCount;
 }
 
-Board.prototype.onUpdateCell = function(cell) {
+Board.prototype.onCellRevealed = function(cell) {
 	// Does nothing - this is for the game to set a callback
 	console.log('Should have a handler for onUpdateCell!');
+}
+
+Board.prototype.onCellFlagChanged = function(cell) {
+	// Does nothing - this is for the game to set a callback
+	console.log('Should have a handler for onCellFlagChanged!');	
 }
 
 Board.prototype.initializeGrid = function() {
@@ -110,15 +115,15 @@ Board.prototype.revealCell = function(cell) {
 	}
 	cell.isRevealed = true;
 
-	this.onUpdateCell(cell);
+	this.onCellRevealed(cell);
 
 	if (cell.neighbourBombs === 0) {
 		cell.neighbours.forEach(function (c) { self.revealCell(c); });
 	}
 }
 
-Board.prototype.flagCellAt = function(x, y) {
+Board.prototype.toggleCellFlag = function(x, y) {
 	var cell = this.cells[x][y];
-	cell.isFlagged = true;
-	this.onUpdateCell(cell);
+	cell.isFlagged = !cell.isFlagged;
+	this.onCellFlagChanged(cell);
 }

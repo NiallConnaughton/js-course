@@ -20,17 +20,16 @@
     display: table-cell;
     border: 1px solid white;
     border-collapse: collapse;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
     text-align: center;
-    /*border-radius: 15px;*/
-    /*margin: 2px;*/
     vertical-align: middle;
-
     color: white;
-
     background-color: #428BCA;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: helvetica;
 }
 
 body {
@@ -47,7 +46,7 @@ body {
 }
 
 .flagged {
-	background-color: red;
+	color: #FF5555;
 }
 
 .revealed {
@@ -85,9 +84,3 @@ body {
 .bombs8 {
 	color: red;
 }
-
-
-/*
-.revealed:before {
-	content: 'O';
-}*/

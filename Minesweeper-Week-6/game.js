@@ -7,24 +7,19 @@ Game.prototype.start = function() {
 	this.renderBoard();
 	this.handleUserInput();
 
-	board.onUpdateCell = this.cellUpdated;
+	board.onCellRevealed = this.cellRevealed;
+	board.onCellFlagChanged = this.cellFlagChanged;
 }
 
-Game.prototype.cellUpdated = function(cell) {
-	//console.log('Updating cell ' + cell);
-
+Game.prototype.cellRevealed = function(cell) {
+	// var $cell = getUiCell(cell);
 	var selector = '[data-x=' + cell.x + '][data-y=' + cell.y + ']';
 	var $cell = $(selector);
 
-	// don't want to do this when the update is a cell being flagged or unflagged
-	$cell.removeClass('selectable');
 
-	// console.log(cell);
+	$cell.removeClass('selectable');
 	if (cell.isBomb) {
 		alert('Game over, man!');
-	}
-	else if (cell.isFlagged) {
-		$cell.toggleClass('flagged');
 	}
 	else {
 		$cell.addClass('revealed');
@@ -34,6 +29,28 @@ Game.prototype.cellUpdated = function(cell) {
 			$cell.html(cell.neighbourBombs);
 		}
 	}
+}
+
+Game.prototype.cellFlagChanged = function(cell) {
+	var selector = '[data-x=' + cell.x + '][data-y=' + cell.y + ']';
+	var $cell = $(selector);
+
+	if (cell.isFlagged)
+		$cell.html('<i class="fa fa-flag"></i>');
+	else
+		$cell.html(' ');
+
+ 	$cell.toggleClass('flagged');
+}
+
+Game.prototype.getUiCell = function(cell) {
+	// This doesn't work because the context during the call is not the Game object.
+	// Need to work out how to fix this.
+
+	var selector = '[data-x=' + cell.x + '][data-y=' + cell.y + ']';
+	var $cell = $(selector);
+
+	return $cell;	
 }
 
 Game.prototype.renderBoard = function() {
@@ -68,7 +85,7 @@ Game.prototype.handleUserInput = function() {
 		}
 		else if (e.button === 2) {
 			// right click
-			self.board.flagCellAt(x, y);
+			self.board.toggleCellFlag(x, y);
 		}
 	});
 }
