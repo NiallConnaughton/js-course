@@ -10,6 +10,7 @@ Game.prototype.start = function() {
 	board.onCellRevealed = this.cellRevealed;
 	board.onCellFlagChanged = this.cellFlagChanged;
 	board.onGameOver = this.gameOver;
+	board.onRemainingBombsChanged = this.updateBombCount;
 }
 
 Game.prototype.gameOver = function(playerWon) {
@@ -49,6 +50,12 @@ Game.prototype.cellFlagChanged = function(cell) {
  	$cell.toggleClass('flagged');
 }
 
+Game.prototype.updateBombCount = function(count) {
+	//starting to look like these should be events instead of individual callbacks
+ 	var $bombsRemaining = $('#bombsRemaining');
+ 	$bombsRemaining.html(count);
+}
+
 Game.prototype.getUiCell = function(cell) {
 	// This doesn't work because the context during the call is not the Game object.
 	// Need to work out how to fix this.
@@ -72,6 +79,8 @@ Game.prototype.renderBoard = function() {
 
 		boardDiv.append(row.join('\n'));
 	}
+
+	this.updateBombCount(this.board.bombsRemaining);
 }
 
 Game.prototype.handleUserInput = function() {

@@ -3,6 +3,7 @@ function Board(size, bombCount) {
 	this.cells = [];
 	this.size = size;
 	this.bombCount = bombCount;
+	this.bombsRemaining = bombCount;
 }
 
 Board.prototype.onCellRevealed = function(cell) {
@@ -141,5 +142,13 @@ Board.prototype.revealAllCells = function() {
 Board.prototype.toggleCellFlag = function(x, y) {
 	var cell = this.cells[x][y];
 	cell.isFlagged = !cell.isFlagged;
+	if (cell.isFlagged) {
+		this.bombsRemaining--;
+	}
+	else {
+		this.bombsRemaining++;
+	}
+
 	this.onCellFlagChanged(cell);
+	this.onRemainingBombsChanged(this.bombsRemaining);
 }
