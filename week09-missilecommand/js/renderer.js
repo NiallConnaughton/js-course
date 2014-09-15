@@ -14,6 +14,7 @@ Renderer.prototype.render = function() {
 	this.game.bunkers.forEach(function(bunker) { self.renderBunker.call(self, bunker); });
 	this.game.defenseMissiles.forEach(function(missile) { self.renderMissile.call(self, missile); });
 	this.game.enemyMissiles.forEach(function(missile) { self.renderMissile.call(self, missile); });
+	this.game.explosions.forEach(function(explosion) { self.renderExplosion.call(self, explosion); });
 }
 
 Renderer.prototype.renderGround = function() {
@@ -59,6 +60,16 @@ Renderer.prototype.renderMissile = function(missile) {
 	this.context.beginPath();
 	this.context.arc(missile.x, missile.y, 3, 0, 2 * Math.PI, false);
     this.context.fillStyle = 'blue';
+    this.context.fill();
+    this.context.lineWidth = 0;
+    this.context.strokeStyle = 'black';
+    this.context.stroke();
+}
+
+Renderer.prototype.renderExplosion = function(explosion) {
+	this.context.beginPath();
+	this.context.arc(explosion.x, explosion.y, explosion.size, 0, 2 * Math.PI, false);
+    this.context.fillStyle = 'red';
     this.context.fill();
     this.context.lineWidth = 0;
     this.context.strokeStyle = 'black';
