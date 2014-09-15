@@ -1,11 +1,23 @@
 var $canvas = $('#canvas');
 var ctx = canvas.getContext('2d'); 
 
-var img = new Image();
-img.src = 'images/ground.png';
-img.onload = function() {
-	var groundPattern = ctx.createPattern(img,'repeat-x');
-	ctx.fillStyle = groundPattern;
-	ctx.translate(0, 495);
-	ctx.fillRect(0, 0, 800, 105);
+function Game() {
+	this.renderer = new Renderer(this);
+	this.cities = [];
 }
+
+Game.prototype.initialize = function() {
+	var city = new City(20, 650);
+	this.cities.push(city);
+}
+
+Game.prototype.onRenderRequest = function (timestamp) {
+	console.log('rendering' + this);
+	this.renderer.render();
+}
+
+
+var game = new Game();
+window.requestAnimationFrame(function(t) {
+	game.onRenderRequest.call(game, t);
+});
