@@ -47,11 +47,20 @@ Renderer.prototype.renderImage = function(url, gameObject) {
 }
 
 Renderer.prototype.renderMissile = function(missile) {
+	// first draw the missile trail
+    this.context.beginPath();
+    this.context.moveTo(missile.sourceX, missile.sourceY);
+    this.context.lineTo(missile.x, missile.y);
+    this.context.lineWidth = 1;
+    this.context.strokeStyle = 'red';
+    this.context.stroke();
+
+	// then the missile itself over its trail
 	this.context.beginPath();
-	this.context.arc(missile.x, missile.y, 5, 0, 2 * Math.PI, false);
-    this.context.fillStyle = 'red';
+	this.context.arc(missile.x, missile.y, 3, 0, 2 * Math.PI, false);
+    this.context.fillStyle = 'blue';
     this.context.fill();
-    this.context.lineWidth = 2;
-    this.context.strokeStyle = '#FFFFFF';
+    this.context.lineWidth = 0;
+    this.context.strokeStyle = 'black';
     this.context.stroke();
 }
