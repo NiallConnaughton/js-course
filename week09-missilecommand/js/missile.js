@@ -4,3 +4,7 @@ function Missile(sourceX, sourceY, targetX, targetY) {
 	this.targetX = targetX;
 	this.targetY = targetY;
 }
+
+Missile.prototype.updatePosition = function(elapsed) {
+
+}

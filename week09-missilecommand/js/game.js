@@ -26,22 +26,40 @@ Game.prototype.initialize = function() {
 	this.bunkers.push(bunker);
 
 	var unexplainedExplosion = new Explosion(80, 80);
-	unexplainedExplosion.size = 50;
+	// unexplainedExplosion.size = 50;
 	this.explosions.push(unexplainedExplosion);
 
 	this.render();
+	this.requestAnimationFrame();
 }
 
-Game.prototype.render = function (timestamp) {
-	console.log('rendering' + this);
+Game.prototype.step = function (elapsed) {
+	this.updatePositions(elapsed);
+	this.render();
+}
+
+Game.prototype.render = function () {
 	this.renderer.render();
+}
+
+Game.prototype.updatePositions = function(elapsed) {
+	var updateables = this.enemyMissiles.concat(this.defenseMissiles).concat(this.explosions);
+
+	updateables.forEach(function(u) { u.updatePosition(elapsed); } );
 }
 
 Game.prototype.requestAnimationFrame = function() {
 	var self = this;
-	window.requestAnimationFrame(function(t) {
-		self.render.call(self, t);
-	});
+	var lastTimestamp = 0;
+
+	var handleAnimationFrame = function(t) {
+		var diff = t - lastTimestamp;
+		lastTimestamp = t;
+		self.step.call(self, diff);
+		window.requestAnimationFrame(handleAnimationFrame);
+	};
+
+	window.requestAnimationFrame(handleAnimationFrame);
 }
 
 var game = new Game();
