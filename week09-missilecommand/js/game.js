@@ -11,13 +11,13 @@ function Game() {
 }
 
 Game.prototype.initialize = function() {
-	var city = new City(20, 450);
+	var city = new City(100, 500);
 	this.cities.push(city);
 
 	var missile = new Missile(10, 0, 50, 550);
 	this.enemyMissiles.push(missile);
 
-	var defenseMissile = new Missile(30, 500, 80, 0);
+	var defenseMissile = new Missile(30, 400, 80, 0);
 	this.defenseMissiles.push(defenseMissile);
 
 	var bunker = new Bunker(10, 500);

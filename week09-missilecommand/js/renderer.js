@@ -1,12 +1,19 @@
 function Renderer(game) {
 	this.game = game;
+
+	this.canvas = document.getElementById('canvas');
+	this.context = this.canvas.getContext('2d');
 }
 
 Renderer.prototype.render = function() {
 	var self = this;
 	this.renderGround();
 
+	// should work out how to bind the functions to the game objects instead of using anonymous loop function
 	this.game.cities.forEach(function(city) { self.renderCity.call(self, city); });
+	this.game.bunkers.forEach(function(bunker) { self.renderBunker.call(self, bunker); });
+	this.game.defenseMissiles.forEach(function(missile) { self.renderMissile.call(self, missile); });
+	this.game.enemyMissiles.forEach(function(missile) { self.renderMissile.call(self, missile); });
 }
 
 Renderer.prototype.renderGround = function() {
@@ -23,8 +30,11 @@ Renderer.prototype.renderGround = function() {
 }
 
 Renderer.prototype.renderCity = function(city) {
-	console.log(this);
 	this.renderImage('images/city.png', city);
+}
+
+Renderer.prototype.renderBunker = function(bunker) {
+	this.renderImage('images/bunker.png', bunker);
 }
 
 Renderer.prototype.renderImage = function(url, gameObject) {
@@ -34,4 +44,14 @@ Renderer.prototype.renderImage = function(url, gameObject) {
 	img.onload = function() {
 		ctx.drawImage(img, gameObject.x, gameObject.y);
 	}
+}
+
+Renderer.prototype.renderMissile = function(missile) {
+	this.context.beginPath();
+	this.context.arc(missile.x, missile.y, 5, 0, 2 * Math.PI, false);
+    this.context.fillStyle = 'red';
+    this.context.fill();
+    this.context.lineWidth = 2;
+    this.context.strokeStyle = '#FFFFFF';
+    this.context.stroke();
 }
