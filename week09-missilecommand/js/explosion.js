@@ -7,6 +7,6 @@ function Explosion(x, y) {
 
 Explosion.prototype.updatePosition = function(elapsed) {
 	if (this.size < 30) {
-		this.size += 20 * elapsed / 1000;
+		this.size += 10 * elapsed / 1000;
 	}
 }

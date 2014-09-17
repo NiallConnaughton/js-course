@@ -18,15 +18,12 @@ Game.prototype.initialize = function() {
 	this.enemyMissiles.push(missile);
 
 	var defenseMissile = new Missile(30, 500, 80, 0);
-	defenseMissile.x = 80;
-	defenseMissile.y = 300;
 	this.defenseMissiles.push(defenseMissile);
 
 	var bunker = new Bunker(10, 500);
 	this.bunkers.push(bunker);
 
 	var unexplainedExplosion = new Explosion(80, 80);
-	// unexplainedExplosion.size = 50;
 	this.explosions.push(unexplainedExplosion);
 
 	this.render();
