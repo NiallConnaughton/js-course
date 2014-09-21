@@ -14,7 +14,6 @@ Game.prototype.initialize = function() {
 	var city = new City(100, 500);
 	this.cities.push(city);
 
-	// var missile = this.createMissile(10, 0, 50, 550);
 	var missile = this.createMissile(10, 0, 50, 200);
 	this.enemyMissiles.push(missile);
 
@@ -23,9 +22,6 @@ Game.prototype.initialize = function() {
 
 	var bunker = new Bunker(10, 500);
 	this.bunkers.push(bunker);
-
-	var unexplainedExplosion = new Explosion(80, 80);
-	this.explosions.push(unexplainedExplosion);
 
 	this.render();
 	this.requestAnimationFrame();
@@ -40,6 +36,7 @@ Game.prototype.createMissile = function(sourceX, sourceY, targetX, targetY) {
 
 Game.prototype.step = function (elapsed) {
 	this.updatePositions(elapsed);
+	this.detectCollisions();
 	this.render();
 }
 
@@ -51,6 +48,18 @@ Game.prototype.updatePositions = function(elapsed) {
 	var updateables = this.enemyMissiles.concat(this.defenseMissiles).concat(this.explosions);
 
 	updateables.forEach(function(u) { u.updatePosition(elapsed); } );
+}
+
+Game.prototype.detectCollisions = function() {
+	this.explosions.forEach(function(e) {
+		var explodedMissiles = this.enemyMissiles.filter(function(m) { return e.explodes(m); }});
+
+		explodedMissiles.forEach(function(m) {
+			
+		})
+
+		this.enemyMissiles = this.enemyMissiles.filter(function(m) { return !e.explodes(m); });
+	});
 }
 
 Game.prototype.onMissileExploded = function(missile) {
