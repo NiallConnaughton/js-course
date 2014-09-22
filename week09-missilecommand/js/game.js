@@ -21,8 +21,12 @@ Game.prototype.initialize = function() {
 
 	var canvas = document.getElementById('canvas');
 	canvas.addEventListener('mousedown', this.fireDefenseMissile.bind(this));
-	this.render();
-	this.requestAnimationFrame();
+
+	var updateRequests = this.getUpdateRequests();
+	var self = this;
+	updateRequests.subscribe(function (timeDelta) {
+		self.step(timeDelta);
+	});
 }
 
 Game.prototype.fireDefenseMissile = function(location) {
@@ -46,7 +50,7 @@ Game.prototype.step = function (elapsed) {
 }
 
 Game.prototype.fireNewEnemyMissiles = function() {
-	if (Math.random() > 0.995) {
+	if (Math.random() > 0.9) {
 		var sourceX = Math.random() * $canvas.width();
 
 		var targets = this.cities.concat(this.bunkers); // where is alive
@@ -96,18 +100,19 @@ Game.prototype.onMissileExploded = function(missile) {
 	this.explosions.push(explosion);
 }
 
-Game.prototype.requestAnimationFrame = function() {
-	var self = this;
-	var lastTimestamp = 0;
+Game.prototype.getUpdateRequests = function() {
+	var updateRequests = Rx.Observable.create(function(observer) {
+		var handleAnimationFrame = function(t) {
+			observer.onNext(t);
+			window.requestAnimationFrame(handleAnimationFrame);
+		};
 
-	var handleAnimationFrame = function(t) {
-		var diff = t - lastTimestamp;
-		lastTimestamp = t;
-		self.step.call(self, diff);
-		window.requestAnimationFrame(handleAnimationFrame);
-	};
+		window.requestAnimationFrame(handleAnimationFrame);	
+	})
+	.publish()
+	.refCount();
 
-	window.requestAnimationFrame(handleAnimationFrame);
+	return updateRequests.zip(updateRequests.skip(1), function(t1, t2) { return t2 - t1; });
 }
 
 var game = new Game();

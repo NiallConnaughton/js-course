@@ -1,13 +1,13 @@
 Gameplay
 missile-missile collisions
 missile-base/bunker collisions
-generating stream of enemy missiles targetted at cities & bunkers
 detecting level victory
 detecting level failure
 scoring mechanism
 
+RX
+
 UI
-reacting to mouse clicks to fire missiles
 drawing dead cities/bunkers
 displaying remaining missiles in bunker
 drawing missile image instead of circle
