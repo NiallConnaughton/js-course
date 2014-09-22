@@ -57,7 +57,9 @@ Renderer.prototype.renderBunker = function(bunker) {
 }
 
 Renderer.prototype.renderImage = function(img, gameObject) {
-	ctx.drawImage(img, gameObject.x, gameObject.y);
+	var top = gameObject.y - img.height / 2;
+	var left = gameObject.x - img.width / 2;
+	ctx.drawImage(img, left, top);
 }
 
 Renderer.prototype.renderMissile = function(missile) {

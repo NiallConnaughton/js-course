@@ -8,7 +8,6 @@ scoring mechanism
 
 UI
 reacting to mouse clicks to fire missiles
-drawing all cities and bunkers
 drawing dead cities/bunkers
 displaying remaining missiles in bunker
 drawing missile image instead of circle

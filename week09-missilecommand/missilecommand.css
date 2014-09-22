@@ -1,0 +1,19 @@
+#canvas:hover {
+	cursor: crosshair;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+
+canvas {
+	position: absolute;
+	border: 1px solid black;
+	margin: -300px 0 0 -400px;
+	top: 50%;
+	left: 50%;
+}

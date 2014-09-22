@@ -11,23 +11,24 @@ function Game() {
 }
 
 Game.prototype.initialize = function() {
+	this.cities.push(new City(120, 520));
+	this.cities.push(new City(400, 500));
+	this.cities.push(new City(620, 530));
 
-	var missile = this.createMissile(10, 0, 50, 200);
-	this.enemyMissiles.push(missile);
+	this.bunkers.push(new Bunker(30, 510));
+	this.bunkers.push(new Bunker(300, 530));
+	this.bunkers.push(new Bunker(720, 520));
 
-	var defenseMissile = this.createMissile(30, 500, 80, 0);
-	this.defenseMissiles.push(defenseMissile);
-
-	this.cities.push(new City(100, 500));
-	this.cities.push(new City(380, 480));
-	this.cities.push(new City(600, 490));
-
-	this.bunkers.push(new Bunker(10, 490));
-	this.bunkers.push(new Bunker(280, 490));
-	this.bunkers.push(new Bunker(700, 500));
-
+	var canvas = document.getElementById('canvas');
+	canvas.addEventListener('mousedown', this.fireDefenseMissile.bind(this));
 	this.render();
 	this.requestAnimationFrame();
+}
+
+Game.prototype.fireDefenseMissile = function(location) {
+	console.log(location);
+	var defenseMissile = this.createMissile(30, 500, location.offsetX, location.offsetY);
+	this.defenseMissiles.push(defenseMissile);
 }
 
 Game.prototype.createMissile = function(sourceX, sourceY, targetX, targetY) {
@@ -38,9 +39,23 @@ Game.prototype.createMissile = function(sourceX, sourceY, targetX, targetY) {
 }
 
 Game.prototype.step = function (elapsed) {
+	this.fireNewEnemyMissiles();
 	this.updatePositions(elapsed);
 	this.detectCollisions();
 	this.render();
+}
+
+Game.prototype.fireNewEnemyMissiles = function() {
+	if (Math.random() > 0.995) {
+		var sourceX = Math.random() * $canvas.width();
+
+		var targets = this.cities.concat(this.bunkers); // where is alive
+		var target = targets[Math.floor(Math.random() * targets.length)];
+
+		var missile = this.createMissile(sourceX, 0, target.x, target.y);
+
+		this.enemyMissiles.push(missile);
+	}
 }
 
 Game.prototype.render = function () {
@@ -69,6 +84,8 @@ Game.prototype.detectCollisions = function() {
 			m.isAlive = false;
 		});
 	});
+
+	this.explosions = this.explosions.filter(function(e) { return e.isAlive; });
 }
 
 Game.prototype.onMissileExploded = function(missile) {
