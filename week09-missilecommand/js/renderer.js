@@ -26,9 +26,17 @@ Renderer.prototype.render = function() {
 	// should work out how to bind the functions to the game objects instead of using anonymous loop function
 	this.game.cities.forEach(function(city) { self.renderCity.call(self, city); });
 	this.game.bunkers.forEach(function(bunker) { self.renderBunker.call(self, bunker); });
-	this.game.defenseMissiles.forEach(function(missile) { self.renderMissile.call(self, missile); });
-	this.game.enemyMissiles.forEach(function(missile) { self.renderMissile.call(self, missile); });
-	this.game.explosions.forEach(function(explosion) { self.renderExplosion.call(self, explosion); });
+	this.game.defenseMissiles
+			 .concat(this.game.enemyMissiles)
+			 .filter(this.isAlive)
+			 .forEach(function(missile) { self.renderMissile.call(self, missile); });
+	this.game.explosions
+			 .filter(this.isAlive)
+			 .forEach(function(explosion) { self.renderExplosion.call(self, explosion); });
+}
+
+Renderer.prototype.isAlive = function(obj) {
+	return obj.isAlive;
 }
 
 Renderer.prototype.renderGround = function() {

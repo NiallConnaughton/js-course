@@ -3,11 +3,16 @@ function Explosion(x, y) {
 	this.y = y;
 	this.size = 0;
 	this.completed = false;
+
+	this.isAlive = true;
 }
 
 Explosion.prototype.updatePosition = function(elapsed) {
 	if (this.size < 30) {
 		this.size += 10 * elapsed / 1000;
+	}
+	else if (this.isAlive) {
+		this.isAlive = false;
 	}
 }
 

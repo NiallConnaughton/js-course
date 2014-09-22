@@ -9,6 +9,8 @@ function Missile(sourceX, sourceY, targetX, targetY) {
 	this.targetDistance = this.getDistance(sourceX, sourceY, targetX, targetY);
 	this.xSpeed = (targetX - sourceX) * this.speed / this.targetDistance;
 	this.ySpeed = (targetY - sourceY) * this.speed / this.targetDistance;
+
+	this.isAlive = true;
 }
 
 Missile.prototype.onExploded = function(missile) {

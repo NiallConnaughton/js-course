@@ -45,20 +45,30 @@ Game.prototype.render = function () {
 }
 
 Game.prototype.updatePositions = function(elapsed) {
-	var updateables = this.enemyMissiles.concat(this.defenseMissiles).concat(this.explosions);
+	var updateables = this.enemyMissiles
+						  .concat(this.defenseMissiles)
+						  .concat(this.explosions)
+						  .filter(function(o) { return o.isAlive; });
 
 	updateables.forEach(function(u) { u.updatePosition(elapsed); } );
 }
 
 Game.prototype.detectCollisions = function() {
+	var self = this;
+	// for (var i = this.enemyMissiles.length - 1; i >= 0; i--) {
+	// 	var missile = enemyMissiles[i];
+	// 	if ()
+	// }
+
 	this.explosions.forEach(function(e) {
-		var explodedMissiles = this.enemyMissiles.filter(function(m) { return e.explodes(m); }});
+		var explodedMissiles = self.enemyMissiles
+								   .concat(self.defenseMissiles)
+								   .filter(function(m) { return m.isAlive && e.explodes(m); });
 
 		explodedMissiles.forEach(function(m) {
-			
-		})
-
-		this.enemyMissiles = this.enemyMissiles.filter(function(m) { return !e.explodes(m); });
+			self.explosions.push(new Explosion(m.x, m.y));
+			m.isAlive = false;
+		});
 	});
 }
 
