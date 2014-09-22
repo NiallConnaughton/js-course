@@ -11,8 +11,6 @@ function Game() {
 }
 
 Game.prototype.initialize = function() {
-	var city = new City(100, 500);
-	this.cities.push(city);
 
 	var missile = this.createMissile(10, 0, 50, 200);
 	this.enemyMissiles.push(missile);
@@ -20,8 +18,13 @@ Game.prototype.initialize = function() {
 	var defenseMissile = this.createMissile(30, 500, 80, 0);
 	this.defenseMissiles.push(defenseMissile);
 
-	var bunker = new Bunker(10, 500);
-	this.bunkers.push(bunker);
+	this.cities.push(new City(100, 500));
+	this.cities.push(new City(380, 480));
+	this.cities.push(new City(600, 490));
+
+	this.bunkers.push(new Bunker(10, 490));
+	this.bunkers.push(new Bunker(280, 490));
+	this.bunkers.push(new Bunker(700, 500));
 
 	this.render();
 	this.requestAnimationFrame();
@@ -55,10 +58,6 @@ Game.prototype.updatePositions = function(elapsed) {
 
 Game.prototype.detectCollisions = function() {
 	var self = this;
-	// for (var i = this.enemyMissiles.length - 1; i >= 0; i--) {
-	// 	var missile = enemyMissiles[i];
-	// 	if ()
-	// }
 
 	this.explosions.forEach(function(e) {
 		var explodedMissiles = self.enemyMissiles

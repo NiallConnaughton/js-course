@@ -1,0 +1,17 @@
+Gameplay
+missile-missile collisions
+missile-base/bunker collisions
+generating stream of enemy missiles targetted at cities & bunkers
+detecting level victory
+detecting level failure
+scoring mechanism
+
+UI
+reacting to mouse clicks to fire missiles
+drawing all cities and bunkers
+drawing dead cities/bunkers
+displaying remaining missiles in bunker
+drawing missile image instead of circle
+gradients for explosions
+fadeout for explosions
+gameover / end of level dialog
