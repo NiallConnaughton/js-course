@@ -82,9 +82,13 @@ Renderer.prototype.renderMissile = function(missile) {
 }
 
 Renderer.prototype.renderExplosion = function(explosion) {
+	var toGo = 30 - explosion.size;
+	var nonRedColour = 8888 * toGo / 30;
+	var colour = '#FF' + ('0000' + Math.floor(nonRedColour)).slice(-4);
+
 	this.context.beginPath();
 	this.context.arc(explosion.x, explosion.y, explosion.size, 0, 2 * Math.PI, false);
-    this.context.fillStyle = 'red';
+    this.context.fillStyle = colour;
     this.context.fill();
     this.context.lineWidth = 0;
     this.context.strokeStyle = 'black';

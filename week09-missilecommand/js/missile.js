@@ -1,9 +1,9 @@
-function Missile(sourceX, sourceY, targetX, targetY) {
+function Missile(sourceX, sourceY, targetX, targetY, speed) {
 	this.x = this.sourceX = sourceX;
 	this.y = this.sourceY = sourceY;
 	this.targetX = targetX;
 	this.targetY = targetY;
-	this.speed = 50;
+	this.speed = speed;
 	this.exploded = false;
 
 	this.targetDistance = this.getDistance(sourceX, sourceY, targetX, targetY);

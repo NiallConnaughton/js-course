@@ -24,19 +24,17 @@ Game.prototype.initialize = function() {
 
 	var updateRequests = this.getUpdateRequests();
 	var self = this;
-	updateRequests.subscribe(function (timeDelta) {
-		self.step(timeDelta);
-	});
+	updateRequests.subscribe(function (timeDelta) { self.step(timeDelta); });
 }
 
 Game.prototype.fireDefenseMissile = function(location) {
 	console.log(location);
-	var defenseMissile = this.createMissile(30, 500, location.offsetX, location.offsetY);
+	var defenseMissile = this.createMissile(30, 500, location.offsetX, location.offsetY, 600);
 	this.defenseMissiles.push(defenseMissile);
 }
 
-Game.prototype.createMissile = function(sourceX, sourceY, targetX, targetY) {
-	var missile = new Missile(sourceX, sourceY, targetX, targetY);
+Game.prototype.createMissile = function(sourceX, sourceY, targetX, targetY, speed) {
+	var missile = new Missile(sourceX, sourceY, targetX, targetY, speed);
 	missile.onExploded = this.onMissileExploded.bind(this);
 
 	return missile;
@@ -50,13 +48,13 @@ Game.prototype.step = function (elapsed) {
 }
 
 Game.prototype.fireNewEnemyMissiles = function() {
-	if (Math.random() > 0.9) {
+	if (Math.random() > 0.99) {
 		var sourceX = Math.random() * $canvas.width();
 
 		var targets = this.cities.concat(this.bunkers); // where is alive
 		var target = targets[Math.floor(Math.random() * targets.length)];
 
-		var missile = this.createMissile(sourceX, 0, target.x, target.y);
+		var missile = this.createMissile(sourceX, 0, target.x, target.y, 50);
 
 		this.enemyMissiles.push(missile);
 	}
@@ -80,7 +78,6 @@ Game.prototype.detectCollisions = function() {
 
 	this.explosions.forEach(function(e) {
 		var explodedMissiles = self.enemyMissiles
-								   .concat(self.defenseMissiles)
 								   .filter(function(m) { return m.isAlive && e.explodes(m); });
 
 		explodedMissiles.forEach(function(m) {
