@@ -54,6 +54,11 @@ Renderer.prototype.renderCity = function(city) {
 
 Renderer.prototype.renderBunker = function(bunker) {
 	this.renderImage(this.bunkerImg, bunker);
+
+	ctx.save();
+	ctx.font = "20pt Arial";
+	ctx.fillText(bunker.remainingMissiles.toString(), bunker.x, bunker.y + 50);
+	ctx.restore();
 }
 
 Renderer.prototype.renderImage = function(img, gameObject) {

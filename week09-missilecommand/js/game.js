@@ -15,9 +15,9 @@ Game.prototype.initialize = function() {
 	this.cities.push(new City(400, 500));
 	this.cities.push(new City(620, 530));
 
-	this.bunkers.push(new Bunker(30, 510));
-	this.bunkers.push(new Bunker(300, 530));
-	this.bunkers.push(new Bunker(720, 520));
+	this.bunkers.push(new Bunker(30, 510, 10));
+	this.bunkers.push(new Bunker(300, 530, 10));
+	this.bunkers.push(new Bunker(720, 520, 10));
 
 	var canvas = document.getElementById('canvas');
 	canvas.addEventListener('mousedown', this.fireDefenseMissile.bind(this));
@@ -28,7 +28,10 @@ Game.prototype.initialize = function() {
 }
 
 Game.prototype.fireDefenseMissile = function(target) {
-	var closestBunker = _.min(this.bunkers, function(b) { return Math.abs(b.x - target.offsetX); });
+	var remainingBunkers = this.bunkers.filter(function(b) { return b.remainingMissiles > 0; });
+	var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
+	closestBunker.fireMissile();
+
 	var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, 600);
 	this.defenseMissiles.push(defenseMissile);
 }

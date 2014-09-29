@@ -1,5 +1,4 @@
 Gameplay
-missile-base/bunker collisions
 detecting level victory
 detecting level failure
 scoring mechanism
@@ -9,7 +8,6 @@ RX
 inheritance of isAlive, x, y, etc
 
 UI
-drawing dead cities/bunkers
 displaying remaining missiles in bunker
 drawing missile image instead of circle
 gameover / end of level dialog

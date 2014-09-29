@@ -4,3 +4,7 @@ function Bunker(x, y, missileCount) {
 	this.remainingMissiles = missileCount;
 	this.isAlive = true;
 }
+
+Bunker.prototype.fireMissile = function() {
+	this.remainingMissiles--;
+}
