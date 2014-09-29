@@ -27,9 +27,9 @@ Game.prototype.initialize = function() {
 	updateRequests.subscribe(function (timeDelta) { self.step(timeDelta); });
 }
 
-Game.prototype.fireDefenseMissile = function(location) {
-	console.log(location);
-	var defenseMissile = this.createMissile(30, 500, location.offsetX, location.offsetY, 600);
+Game.prototype.fireDefenseMissile = function(target) {
+	var closestBunker = _.min(this.bunkers, function(b) { return Math.abs(b.x - target.offsetX); });
+	var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, 600);
 	this.defenseMissiles.push(defenseMissile);
 }
 
@@ -48,7 +48,7 @@ Game.prototype.step = function (elapsed) {
 }
 
 Game.prototype.fireNewEnemyMissiles = function() {
-	if (Math.random() > 0.99) {
+	if (Math.random() > 0.995) {
 		var sourceX = Math.random() * $canvas.width();
 
 		var targets = this.cities.concat(this.bunkers); // where is alive

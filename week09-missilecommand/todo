@@ -11,6 +11,4 @@ UI
 drawing dead cities/bunkers
 displaying remaining missiles in bunker
 drawing missile image instead of circle
-gradients for explosions
-fadeout for explosions
 gameover / end of level dialog

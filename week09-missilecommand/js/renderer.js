@@ -82,15 +82,15 @@ Renderer.prototype.renderMissile = function(missile) {
 }
 
 Renderer.prototype.renderExplosion = function(explosion) {
-	var toGo = 30 - explosion.size;
-	var nonRedColour = 8888 * toGo / 30;
-	var colour = '#FF' + ('0000' + Math.floor(nonRedColour)).slice(-4);
+	var nonRedColour = Math.floor(255 * explosion.size / 30);
+	var nonRedColourHex = ('00' + nonRedColour.toString(16)).slice(-2); 
+	var colour = '#FF' + nonRedColourHex + nonRedColourHex;
 
 	this.context.beginPath();
 	this.context.arc(explosion.x, explosion.y, explosion.size, 0, 2 * Math.PI, false);
     this.context.fillStyle = colour;
     this.context.fill();
     this.context.lineWidth = 0;
-    this.context.strokeStyle = 'black';
+    this.context.strokeStyle = colour;
     this.context.stroke();
 }
