@@ -29,11 +29,14 @@ Game.prototype.initialize = function() {
 
 Game.prototype.fireDefenseMissile = function(target) {
 	var remainingBunkers = this.bunkers.filter(function(b) { return b.remainingMissiles > 0; });
-	var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
-	closestBunker.fireMissile();
 
-	var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, 600);
-	this.defenseMissiles.push(defenseMissile);
+	if (_.any(remainingBunkers)) {
+		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
+		closestBunker.fireMissile();
+		
+		var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, 600);
+		this.defenseMissiles.push(defenseMissile);
+	}
 }
 
 Game.prototype.createMissile = function(sourceX, sourceY, targetX, targetY, speed) {

@@ -8,6 +8,5 @@ RX
 inheritance of isAlive, x, y, etc
 
 UI
-displaying remaining missiles in bunker
 drawing missile image instead of circle
 gameover / end of level dialog

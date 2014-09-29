@@ -17,15 +17,15 @@ Explosion.prototype.updatePosition = function(elapsed) {
 }
 
 Explosion.prototype.explodes = function(other) {
-	var distance = this.getDistance(this.x, this.y, other.x, other.y);
+	var distance = this.getDistance(this, other);
 
 	return distance <= this.size;
 }
 
-Explosion.prototype.getDistance = function(sourceX, sourceY, targetX, targetY) {
+Explosion.prototype.getDistance = function(source, target) {
 	// Refactor this into something shared
 
-	var dx = targetX - sourceX;
-	var dy = targetY - sourceY;
+	var dx = target.x - source.x;
+	var dy = target.y - source.y;
 	return Math.sqrt(dx * dx + dy* dy);
 }
