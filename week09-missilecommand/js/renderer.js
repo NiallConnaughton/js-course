@@ -19,20 +19,28 @@ Renderer.prototype.loadImage = function(url) {
 Renderer.prototype.render = function() {
 	var self = this;
 
-	this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.clearCanvas();
 
 	this.renderGround();
 
+	// draw each of the cities, bunkers, missiles and explosions if they are still alive
 	var render = function(items, renderFunc) {
-		items.filter(function (i) { return i.isAlive; })
-		.forEach(renderFunc.bind(self));
+		items.forEach(renderFunc.bind(self));
 	}
 
-	// should work out how to bind the functions to the game objects instead of using anonymous loop function
 	render(this.game.cities, this.renderCity);
 	render(this.game.bunkers, this.renderBunker);
 	render(this.game.defenseMissiles.concat(this.game.enemyMissiles), this.renderMissile);
 	render(this.game.explosions, this.renderExplosion);
+}
+
+Renderer.prototype.clearCanvas = function() {
+	ctx.save();
+	ctx.beginPath();
+	ctx.rect(0, 0, this.canvas.width, this.canvas.height);
+	ctx.fillStyle = "black";
+	ctx.fill();
+	ctx.restore();
 }
 
 Renderer.prototype.isAlive = function(obj) {
@@ -54,10 +62,13 @@ Renderer.prototype.renderCity = function(city) {
 
 Renderer.prototype.renderBunker = function(bunker) {
 	this.renderImage(this.bunkerImg, bunker);
+	var missileCounterColour = bunker.remainingMissiles > 3 ? "#DDDDDD" : "red";
 
 	ctx.save();
-	ctx.font = "20pt Arial";
-	ctx.fillText(bunker.remainingMissiles.toString(), bunker.x, bunker.y + 50);
+	ctx.font = "16pt Stencil";
+	ctx.fillStyle = missileCounterColour;
+	ctx.textAlign = "center";
+	ctx.fillText(bunker.remainingMissiles.toString(), bunker.x, bunker.y + 40);
 	ctx.restore();
 }
 
@@ -68,26 +79,32 @@ Renderer.prototype.renderImage = function(img, gameObject) {
 }
 
 Renderer.prototype.renderMissile = function(missile) {
+	ctx.save();
+
 	// first draw the missile trail
     this.context.beginPath();
     this.context.moveTo(missile.sourceX, missile.sourceY);
     this.context.lineTo(missile.x, missile.y);
     this.context.lineWidth = 1;
-    this.context.strokeStyle = 'red';
+    this.context.strokeStyle = 'grey';
     this.context.stroke();
 
 	// then the missile itself over its trail
 	this.context.beginPath();
 	this.context.arc(missile.x, missile.y, 3, 0, 2 * Math.PI, false);
-    this.context.fillStyle = 'blue';
+    this.context.fillStyle = 'red';
     this.context.fill();
     this.context.lineWidth = 0;
     this.context.strokeStyle = 'black';
     this.context.stroke();
+
+    ctx.restore();
 }
 
 Renderer.prototype.renderExplosion = function(explosion) {
-	var nonRedColour = Math.floor(255 * explosion.size / 30);
+	ctx.save();
+
+	var nonRedColour = Math.floor(170 * explosion.size / 30);
 	var nonRedColourHex = ('00' + nonRedColour.toString(16)).slice(-2); 
 	var colour = '#FF' + nonRedColourHex + nonRedColourHex;
 
@@ -98,4 +115,6 @@ Renderer.prototype.renderExplosion = function(explosion) {
     this.context.lineWidth = 0;
     this.context.strokeStyle = colour;
     this.context.stroke();
+
+    ctx.restore();
 }

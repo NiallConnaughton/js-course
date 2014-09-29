@@ -54,7 +54,7 @@ Game.prototype.fireNewEnemyMissiles = function() {
 	if (Math.random() > 0.995) {
 		var sourceX = Math.random() * $canvas.width();
 
-		var targets = this.cities.concat(this.bunkers); // where is alive
+		var targets = this.cities.concat(this.bunkers);
 		var target = targets[Math.floor(Math.random() * targets.length)];
 
 		var missile = this.createMissile(sourceX, 0, target.x, target.y, 50);
@@ -89,10 +89,18 @@ Game.prototype.detectCollisions = function() {
 		});
 	});
 
-	var removeDeadObjects = function(items) { return items.filter(function(i) { return i.isAlive; }); };
-	this.explosions = removeDeadObjects(this.explosions);
-	this.cities = removeDeadObjects(this.cities);
-	this.bunkers = removeDeadObjects(this.bunkers);
+	this.removeDeadObjects(this.explosions);
+	this.removeDeadObjects(this.cities);
+	this.removeDeadObjects(this.bunkers);
+	this.removeDeadObjects(this.enemyMissiles);
+}
+
+Game.prototype.removeDeadObjects = function(items) {
+	for (var i = items.length - 1; i >= 0; i--) {
+		if (!items[i].isAlive) {
+			items.splice(i, 1);
+		}
+	}
 }
 
 Game.prototype.onMissileExploded = function(missile) {
