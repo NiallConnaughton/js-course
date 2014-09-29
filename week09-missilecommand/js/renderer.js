@@ -23,16 +23,16 @@ Renderer.prototype.render = function() {
 
 	this.renderGround();
 
+	var render = function(items, renderFunc) {
+		items.filter(function (i) { return i.isAlive; })
+		.forEach(renderFunc.bind(self));
+	}
+
 	// should work out how to bind the functions to the game objects instead of using anonymous loop function
-	this.game.cities.forEach(function(city) { self.renderCity.call(self, city); });
-	this.game.bunkers.forEach(function(bunker) { self.renderBunker.call(self, bunker); });
-	this.game.defenseMissiles
-			 .concat(this.game.enemyMissiles)
-			 .filter(this.isAlive)
-			 .forEach(function(missile) { self.renderMissile.call(self, missile); });
-	this.game.explosions
-			 .filter(this.isAlive)
-			 .forEach(function(explosion) { self.renderExplosion.call(self, explosion); });
+	render(this.game.cities, this.renderCity);
+	render(this.game.bunkers, this.renderBunker);
+	render(this.game.defenseMissiles.concat(this.game.enemyMissiles), this.renderMissile);
+	render(this.game.explosions, this.renderExplosion);
 }
 
 Renderer.prototype.isAlive = function(obj) {

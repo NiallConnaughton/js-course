@@ -77,16 +77,19 @@ Game.prototype.detectCollisions = function() {
 	var self = this;
 
 	this.explosions.forEach(function(e) {
-		var explodedMissiles = self.enemyMissiles
-								   .filter(function(m) { return m.isAlive && e.explodes(m); });
+		var explodedObjects = self.enemyMissiles.concat(self.bunkers).concat(self.cities)
+								  .filter(function(m) { return m.isAlive && e.explodes(m); });
 
-		explodedMissiles.forEach(function(m) {
+		explodedObjects.forEach(function(m) {
 			self.explosions.push(new Explosion(m.x, m.y));
 			m.isAlive = false;
 		});
 	});
 
-	this.explosions = this.explosions.filter(function(e) { return e.isAlive; });
+	var removeDeadObjects = function(items) { return items.filter(function(i) { return i.isAlive; }); };
+	this.explosions = removeDeadObjects(this.explosions);
+	this.cities = removeDeadObjects(this.cities);
+	this.bunkers = removeDeadObjects(this.bunkers);
 }
 
 Game.prototype.onMissileExploded = function(missile) {

@@ -1,11 +1,12 @@
 Gameplay
-missile-missile collisions
 missile-base/bunker collisions
 detecting level victory
 detecting level failure
 scoring mechanism
 
+Design
 RX
+inheritance of isAlive, x, y, etc
 
 UI
 drawing dead cities/bunkers
