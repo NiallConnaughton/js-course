@@ -26,22 +26,30 @@ Game.prototype.initialize = function() {
 	var self = this;
 	updateRequests.subscribe(function (timeDelta) { self.step(timeDelta); });
 
-	this.getEnemyMissileLaunches(10).subscribe(this.fireNewEnemyMissile.bind(this));
+	var totalEnemyMissiles = 20;
+	var self = this;
+	var gameLost = updateRequests.where(function() { return	!_.any(self.cities) && !_.any(self.bunkers); }).take(1);
+	gameLost.subscribe(function() { console.log('GAME OVER, MAN!'); });
+
+
+	this.getEnemyMissileLaunches(totalEnemyMissiles)
+		.do(function() { totalEnemyMissiles--; })
+		.subscribe(this.fireNewEnemyMissile.bind(this));
 }
 
 Game.prototype.getEnemyMissileLaunches = function(missileCount) {
 	// generate a sequence of relative launch times, randomly between 0 and 10 seconds apart
-	var delays = Rx.Observable.generate(
-		0,
-		function(x) { return x < missileCount; },
-		function(x) { return ++x; },
-		function(x) { return Math.random() * 10000; });
+
+	var delays = [];
+	for (var i = 0; i < missileCount; i++) {
+		delays.push(Math.random() * 5000);
+	}
 
 	// take the launch times and map them to observable timers that will fire at the launch time
-	// then concat that set of timers into one stream of launches
-	var launches = delays.select(function(t) { return Rx.Observable.timer(t); }).concatAll();
-
-	return launches;
+	return Rx.Observable.for(delays, function(d) { return Rx.Observable.timer(d); });
+	
+	// for great justice, replace the line above with this. No idea why it does that.
+	// return Rx.Observable.for(delays, Rx.Observable.timer);
 }
 
 Game.prototype.fireDefenseMissile = function(target) {
