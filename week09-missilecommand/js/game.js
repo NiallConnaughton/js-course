@@ -25,6 +25,23 @@ Game.prototype.initialize = function() {
 	var updateRequests = this.getUpdateRequests();
 	var self = this;
 	updateRequests.subscribe(function (timeDelta) { self.step(timeDelta); });
+
+	this.getEnemyMissileLaunches(10).subscribe(this.fireNewEnemyMissile.bind(this));
+}
+
+Game.prototype.getEnemyMissileLaunches = function(missileCount) {
+	// generate a sequence of relative launch times, randomly between 0 and 10 seconds apart
+	var delays = Rx.Observable.generate(
+		0,
+		function(x) { return x < missileCount; },
+		function(x) { return ++x; },
+		function(x) { return Math.random() * 10000; });
+
+	// take the launch times and map them to observable timers that will fire at the launch time
+	// then concat that set of timers into one stream of launches
+	var launches = delays.select(function(t) { return Rx.Observable.timer(t); }).concatAll();
+
+	return launches;
 }
 
 Game.prototype.fireDefenseMissile = function(target) {
@@ -33,7 +50,7 @@ Game.prototype.fireDefenseMissile = function(target) {
 	if (_.any(remainingBunkers)) {
 		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
 		closestBunker.fireMissile();
-		
+
 		var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, 600);
 		this.defenseMissiles.push(defenseMissile);
 	}
@@ -47,23 +64,21 @@ Game.prototype.createMissile = function(sourceX, sourceY, targetX, targetY, spee
 }
 
 Game.prototype.step = function (elapsed) {
-	this.fireNewEnemyMissiles();
+	// this.fireNewEnemyMissiles();
 	this.updatePositions(elapsed);
 	this.detectCollisions();
 	this.render();
 }
 
-Game.prototype.fireNewEnemyMissiles = function() {
-	if (Math.random() > 0.995) {
-		var sourceX = Math.random() * $canvas.width();
+Game.prototype.fireNewEnemyMissile = function() {
+	var sourceX = Math.random() * $canvas.width();
 
-		var targets = this.cities.concat(this.bunkers);
-		var target = targets[Math.floor(Math.random() * targets.length)];
+	var targets = this.cities.concat(this.bunkers);
+	var target = targets[Math.floor(Math.random() * targets.length)];
 
-		var missile = this.createMissile(sourceX, 0, target.x, target.y, 50);
+	var missile = this.createMissile(sourceX, 0, target.x, target.y, 50);
 
-		this.enemyMissiles.push(missile);
-	}
+	this.enemyMissiles.push(missile);
 }
 
 Game.prototype.render = function () {
