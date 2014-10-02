@@ -1,4 +1,4 @@
-var $canvas = $('#canvas');
+var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d'); 
 
 function Game() {
@@ -22,21 +22,26 @@ Game.prototype.initialize = function() {
 
 	this.remainingEnemyMissiles = 10 + this.level * 10;
 
-	$canvas.click(this.fireDefenseMissile.bind(this));
-
 	var updateRequests = this.getUpdateRequests();
-	var self = this;
-	updateRequests.subscribe(function (timeDelta) { self.step(timeDelta); });
+	updateRequests.subscribe(this.step.bind(this));
 
-	var gameLost = updateRequests.where(this.levelLost.bind(this)).take(1);
-	var levelWon = updateRequests.where(this.levelWon.bind(this)).take(1);
+	var gameLost = updateRequests.where(this.levelLost.bind(this))
+								 .take(1);
+
+	var levelWon = updateRequests.where(this.levelWon.bind(this))
+								 .takeUntil(gameLost)
+								 .take(1);
 
 	gameLost.subscribe(function() { console.log('GAME OVER, MAN!'); });
 	levelWon.subscribe(function() { console.log('WINNERS DON\'T USE DRUGS'); });
 
 	this.getEnemyMissileLaunches(this.remainingEnemyMissiles)
 		.takeUntil(gameLost)
-		.subscribe(this.fireNewEnemyMissile.bind(this));
+		.subscribe(this.fireEnemyMissile.bind(this));
+
+	Rx.Observable.fromEvent(canvas, "mousedown")
+				 .takeUntil(levelWon.merge(gameLost))
+				 .subscribe(this.fireDefenseMissile.bind(this));
 }
 
 Game.prototype.levelWon = function() {
@@ -85,14 +90,13 @@ Game.prototype.createMissile = function(sourceX, sourceY, targetX, targetY, spee
 }
 
 Game.prototype.step = function (elapsed) {
-	// this.fireNewEnemyMissiles();
 	this.updatePositions(elapsed);
 	this.detectCollisions();
 	this.render();
 }
 
-Game.prototype.fireNewEnemyMissile = function() {
-	var sourceX = Math.random() * $canvas.width();
+Game.prototype.fireEnemyMissile = function() {
+	var sourceX = Math.random() * canvas.width;
 
 	var targets = this.cities.concat(this.bunkers);
 	var target = targets[Math.floor(Math.random() * targets.length)];
