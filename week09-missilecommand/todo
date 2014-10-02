@@ -1,5 +1,8 @@
 Gameplay
-scoring mechanism
+scoring mechanism per level
+points for destroying missile
+points for each city remaining at end of level
+points for each bunker remaining at end of level
 
 Design
 RX
@@ -7,4 +10,24 @@ inheritance of isAlive, x, y, etc
 
 UI
 drawing missile image instead of circle
-gameover / end of level dialog
+gameover dialog
+end of level dialog
+start of game dialog
+
+
+High Scores
+create high scores list
+ui to display high scores
+create node server
+request high scores from server
+push new score to server at end of game
+dialog to enter initials if new score is high score
+
+record enemy & defense missile launches during game
+	- source, target, timeoffset
+add record to game score object
+replay game object
+time compression to speed up replay
+add play button to high scores to replay the game
+
+demo mode chooses random high score to replay before game starts
