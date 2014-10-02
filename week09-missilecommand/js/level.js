@@ -31,33 +31,6 @@ Level.prototype.levelLost = function() {
 	return !_.any(this.cities); 
 }
 
-Level.prototype.detectCollisions = function() {
-	var self = this;
-
-	this.explosions.forEach(function(e) {
-		var explodedObjects = self.enemyMissiles.concat(self.bunkers).concat(self.cities)
-								  .filter(function(m) { return m.isAlive && e.explodes(m); });
-
-		explodedObjects.forEach(function(m) {
-			self.explosions.push(new Explosion(m.x, m.y));
-			m.isAlive = false;
-		});
-	});
-
-	this.removeDeadObjects(this.explosions);
-	this.removeDeadObjects(this.cities);
-	this.removeDeadObjects(this.bunkers);
-	this.removeDeadObjects(this.enemyMissiles);
-}
-
-Level.prototype.removeDeadObjects = function(items) {
-	for (var i = items.length - 1; i >= 0; i--) {
-		if (!items[i].isAlive) {
-			items.splice(i, 1);
-		}
-	}
-}
-
 Level.prototype.onMissileExploded = function(missile) {
 	this.defenseMissiles = this.defenseMissiles.filter(function (m) { return m != missile });
 	this.enemyMissiles = this.enemyMissiles.filter(function (m) { return m != missile; });
@@ -101,17 +74,47 @@ Level.prototype.updatePositions = function(elapsed) {
 	var updateables = this.enemyMissiles
 						  .concat(this.defenseMissiles)
 						  .concat(this.explosions);
-						  // .filter(function(o) { return o.isAlive; });
 
 	updateables.forEach(function(u) { u.updatePosition(elapsed); } );
+
+	this.checkForDestroyedObjects();
+}
+
+Level.prototype.checkForDestroyedObjects = function() {
+	var self = this;
+
+	this.explosions.forEach(function(e) {
+		var explodedObjects = self.enemyMissiles.concat(self.bunkers).concat(self.cities)
+								  .filter(function(m) { return m.isAlive && e.explodes(m); });
+
+		explodedObjects.forEach(function(m) {
+			self.explosions.push(new Explosion(m.x, m.y));
+			m.isAlive = false;
+		});
+	});
+
+	this.removeDeadObjects(this.explosions);
+	this.removeDeadObjects(this.cities);
+	this.removeDeadObjects(this.bunkers);
+	this.removeDeadObjects(this.enemyMissiles);
+}
+
+Level.prototype.removeDeadObjects = function(items) {
+	for (var i = items.length - 1; i >= 0; i--) {
+		if (!items[i].isAlive) {
+			items.splice(i, 1);
+		}
+	}
 }
 
 Level.prototype.getEnemyMissileLaunches = function() {
 	// generate a sequence of relative launch times, randomly between 0 and 10 seconds apart
 
+	var averageGap = 60000 / this.totalEnemyMissiles;
+
 	var delays = [];
 	for (var i = 0; i < this.totalEnemyMissiles; i++) {
-		delays.push(Math.random() * 5000);
+		delays.push(Math.random() * averageGap * 2);
 	}
 
 	// take the launch times and map them to observable timers that will fire at the launch time

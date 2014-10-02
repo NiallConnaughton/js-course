@@ -33,7 +33,7 @@ Game.prototype.initialize = function() {
 
 Game.prototype.step = function (elapsed) {
 	this.level.updatePositions(elapsed);
-	this.level.detectCollisions();
+
 	this.renderer.render(this.level);
 }
 
