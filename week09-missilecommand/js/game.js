@@ -8,6 +8,7 @@ function Game() {
 	this.enemyMissiles = [];
 	this.defenseMissiles = [];
 	this.explosions = [];
+	this.level = 1;
 }
 
 Game.prototype.initialize = function() {
@@ -19,23 +20,34 @@ Game.prototype.initialize = function() {
 	this.bunkers.push(new Bunker(300, 530, 10));
 	this.bunkers.push(new Bunker(720, 520, 10));
 
-	var canvas = document.getElementById('canvas');
-	canvas.addEventListener('mousedown', this.fireDefenseMissile.bind(this));
+	this.remainingEnemyMissiles = 10 + this.level * 10;
+
+	$canvas.click(this.fireDefenseMissile.bind(this));
 
 	var updateRequests = this.getUpdateRequests();
 	var self = this;
 	updateRequests.subscribe(function (timeDelta) { self.step(timeDelta); });
 
-	var totalEnemyMissiles = 20;
-	var self = this;
-	var gameLost = updateRequests.where(function() { return	!_.any(self.cities) && !_.any(self.bunkers); }).take(1);
+	var gameLost = updateRequests.where(this.levelLost.bind(this)).take(1);
+	var levelWon = updateRequests.where(this.levelWon.bind(this)).take(1);
+
 	gameLost.subscribe(function() { console.log('GAME OVER, MAN!'); });
+	levelWon.subscribe(function() { console.log('WINNERS DON\'T USE DRUGS'); });
 
-
-	this.getEnemyMissileLaunches(totalEnemyMissiles)
+	this.getEnemyMissileLaunches(this.remainingEnemyMissiles)
 		.takeUntil(gameLost)
-		.do(function() { totalEnemyMissiles--; })
 		.subscribe(this.fireNewEnemyMissile.bind(this));
+}
+
+Game.prototype.levelWon = function() {
+	// the level is won when there are no more missiles remaining to be fired, none in flight,
+	// and no explosions that could possibly still kill a city
+
+	return this.remainingEnemyMissiles === 0 && !_.any(this.enemyMissiles) && !_.any(this.explosions);
+}
+
+Game.prototype.levelLost = function() {
+	return !_.any(this.cities); 
 }
 
 Game.prototype.getEnemyMissileLaunches = function(missileCount) {
@@ -88,6 +100,7 @@ Game.prototype.fireNewEnemyMissile = function() {
 	var missile = this.createMissile(sourceX, 0, target.x, target.y, 50);
 
 	this.enemyMissiles.push(missile);
+	this.remainingEnemyMissiles--;
 }
 
 Game.prototype.render = function () {
