@@ -12,11 +12,14 @@ Level.prototype.initialize = function() {
 	this.cities.push(new City(400, 500));
 	this.cities.push(new City(620, 530));
 
-	this.bunkers.push(new Bunker(30, 510, 10));
-	this.bunkers.push(new Bunker(300, 530, 10));
-	this.bunkers.push(new Bunker(720, 520, 10));
+	var totalDefenseMissiles = 20 + this.level * 3;
+	var missilesPerBunker = Math.floor(totalDefenseMissiles / 3);
 
-	this.totalEnemyMissiles = 10 + this.level * 10;
+	this.bunkers.push(new Bunker(30, 510, missilesPerBunker));
+	this.bunkers.push(new Bunker(300, 530, missilesPerBunker));
+	this.bunkers.push(new Bunker(720, 520, missilesPerBunker));
+
+	this.totalEnemyMissiles = 5 + this.level * 5;
 	this.remainingEnemyMissiles = this.totalEnemyMissiles;
 }
 
@@ -58,7 +61,7 @@ Level.prototype.fireDefenseMissile = function(target) {
 		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
 		closestBunker.fireMissile();
 
-		var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, 600);
+		var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, 1000);
 		this.defenseMissiles.push(defenseMissile);
 	}
 }
@@ -108,9 +111,11 @@ Level.prototype.removeDeadObjects = function(items) {
 }
 
 Level.prototype.getEnemyMissileLaunches = function() {
-	// generate a sequence of relative launch times, randomly between 0 and 10 seconds apart
+	// level should last around 15 seconds
 
-	var averageGap = 60000 / this.totalEnemyMissiles;
+	var averageGap = 15000 / this.totalEnemyMissiles;
+
+	console.log('level ' + this.level + ': ' + this.totalEnemyMissiles + ' missiles, launched every ' + averageGap + 'ms.');
 
 	var delays = [];
 	for (var i = 0; i < this.totalEnemyMissiles; i++) {

@@ -10,7 +10,6 @@ Game.prototype.initialize = function() {
 	this.level.initialize();
 
 	var updateRequests = this.getUpdateRequests();
-	updateRequests.subscribe(this.step.bind(this));
 
 	var gameLost = updateRequests.where(this.level.levelLost.bind(this.level))
 								 .take(1);
@@ -29,6 +28,16 @@ Game.prototype.initialize = function() {
 	Rx.Observable.fromEvent(canvas, "mousedown")
 				 .takeUntil(levelWon.merge(gameLost))
 				 .subscribe(this.level.fireDefenseMissile.bind(this.level));
+
+	updateRequests.takeUntil(levelWon.merge(gameLost))
+				  .subscribe(this.step.bind(this));
+
+	levelWon.subscribe(this.levelUp.bind(this));
+}
+
+Game.prototype.levelUp = function() { 
+	this.level = new Level(this.level.level + 1);
+	this.initialize();
 }
 
 Game.prototype.step = function (elapsed) {
