@@ -33,6 +33,7 @@ Game.prototype.initialize = function() {
 
 
 	this.getEnemyMissileLaunches(totalEnemyMissiles)
+		.takeUntil(gameLost)
 		.do(function() { totalEnemyMissiles--; })
 		.subscribe(this.fireNewEnemyMissile.bind(this));
 }
