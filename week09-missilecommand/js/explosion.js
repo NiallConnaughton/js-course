@@ -9,7 +9,7 @@ function Explosion(x, y) {
 
 Explosion.prototype.updatePosition = function(elapsed) {
 	if (this.size < 30) {
-		this.size += 20 * elapsed / 1000;
+		this.size += 30 * elapsed / 1000;
 	}
 	else if (this.isAlive) {
 		this.isAlive = false;
