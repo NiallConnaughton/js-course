@@ -1,6 +1,4 @@
-function Renderer(game) {
-	this.game = game;
-
+function Renderer() {
 	this.canvas = document.getElementById('canvas');
 	this.context = this.canvas.getContext('2d');
 
@@ -16,7 +14,7 @@ Renderer.prototype.loadImage = function(url) {
 	return img;
 }
 
-Renderer.prototype.render = function() {
+Renderer.prototype.render = function(level) {
 	var self = this;
 
 	this.clearCanvas();
@@ -28,10 +26,10 @@ Renderer.prototype.render = function() {
 		items.forEach(renderFunc.bind(self));
 	}
 
-	render(this.game.cities, this.renderCity);
-	render(this.game.bunkers, this.renderBunker);
-	render(this.game.defenseMissiles.concat(this.game.enemyMissiles), this.renderMissile);
-	render(this.game.explosions, this.renderExplosion);
+	render(level.cities, this.renderCity);
+	render(level.bunkers, this.renderBunker);
+	render(level.defenseMissiles.concat(level.enemyMissiles), this.renderMissile);
+	render(level.explosions, this.renderExplosion);
 }
 
 Renderer.prototype.clearCanvas = function() {
