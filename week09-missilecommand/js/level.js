@@ -31,7 +31,7 @@ Level.prototype.levelWon = function() {
 }
 
 Level.prototype.levelLost = function() {
-	return !_.any(this.cities); 
+	return !_.any(this.cities) && !_.any(this.explosions); 
 }
 
 Level.prototype.onMissileExploded = function(missile) {
