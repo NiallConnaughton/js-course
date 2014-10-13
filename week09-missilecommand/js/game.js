@@ -36,7 +36,7 @@ Game.prototype.initialize = function() {
 }
 
 Game.prototype.levelUp = function() { 
-	this.level = new Level(this.level.level + 1);
+	this.level = this.level.createNextLevel();
 	this.initialize();
 }
 

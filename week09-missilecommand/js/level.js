@@ -1,26 +1,46 @@
-function Level(level) {
+function Level(level, previousLevel) {
 	this.cities = [];
 	this.bunkers = [];
 	this.enemyMissiles = [];
 	this.defenseMissiles = [];
 	this.explosions = [];
 	this.level = level;
+	this.previousLevel = previousLevel;
 }
 
 Level.prototype.initialize = function() {
+	if (this.previousLevel) {
+		this.initializeFromPreviousLevel(this.previousLevel);
+	}
+	else {
+		this.initializeNewLevel();
+	}
+
+	var totalDefenseMissiles = 20 + this.level * 3;
+	var missilesPerBunker = Math.floor(totalDefenseMissiles / this.bunkers.length);
+	this.bunkers.forEach(function(b) { b.initialize(missilesPerBunker); });
+
+	this.totalEnemyMissiles = 5 + this.level * 5;
+	this.remainingEnemyMissiles = this.totalEnemyMissiles;
+}
+
+Level.prototype.initializeNewLevel = function() {
 	this.cities.push(new City(120, 520));
 	this.cities.push(new City(400, 500));
 	this.cities.push(new City(620, 530));
 
-	var totalDefenseMissiles = 20 + this.level * 3;
-	var missilesPerBunker = Math.floor(totalDefenseMissiles / 3);
+	this.bunkers.push(new Bunker(30, 510));
+	this.bunkers.push(new Bunker(300, 530));
+	this.bunkers.push(new Bunker(720, 520));
+}
 
-	this.bunkers.push(new Bunker(30, 510, missilesPerBunker));
-	this.bunkers.push(new Bunker(300, 530, missilesPerBunker));
-	this.bunkers.push(new Bunker(720, 520, missilesPerBunker));
+Level.prototype.initializeFromPreviousLevel = function(previousLevel) {
+	this.cities = [].concat(previousLevel.cities);
+	this.bunkers = [].concat(previousLevel.bunkers);
+}
 
-	this.totalEnemyMissiles = 5 + this.level * 5;
-	this.remainingEnemyMissiles = this.totalEnemyMissiles;
+Level.prototype.createNextLevel = function() {
+	return new Level(this.level + 1, this);
 }
 
 Level.prototype.levelWon = function() {
@@ -48,10 +68,12 @@ Level.prototype.fireEnemyMissile = function() {
 	var targets = this.cities.concat(this.bunkers);
 	var target = targets[Math.floor(Math.random() * targets.length)];
 
-	var missile = this.createMissile(sourceX, 0, target.x, target.y, 50);
+	if (target) {
+		var missile = this.createMissile(sourceX, 0, target.x, target.y, 50);
 
-	this.enemyMissiles.push(missile);
-	this.remainingEnemyMissiles--;
+		this.enemyMissiles.push(missile);
+		this.remainingEnemyMissiles--;
+	}
 }
 
 Level.prototype.fireDefenseMissile = function(target) {
