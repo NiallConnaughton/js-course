@@ -3,20 +3,20 @@ var ctx = canvas.getContext('2d');
 
 function Game() {
 	this.renderer = new Renderer();
-	this.level = new Level(1);
+	this.score = 0;
+	this.updateRequests = this.getUpdateRequests();
+	this.level = new Level(1, this.updateRequests);
 }
 
 Game.prototype.initialize = function() {
 	this.level.initialize();
 
-	var updateRequests = this.getUpdateRequests();
+	var gameLost = this.updateRequests.where(this.level.levelLost.bind(this.level))
+								 	  .take(1);
 
-	var gameLost = updateRequests.where(this.level.levelLost.bind(this.level))
-								 .take(1);
-
-	var levelWon = updateRequests.where(this.level.levelWon.bind(this.level))
-								 .takeUntil(gameLost)
-								 .take(1);
+	var levelWon = this.updateRequests.where(this.level.levelWon.bind(this.level))
+									  .takeUntil(gameLost)
+									  .take(1);
 
 	gameLost.subscribe(function() { console.log('GAME OVER, MAN!'); });
 	levelWon.subscribe(function() { console.log('WINNERS DON\'T USE DRUGS'); });
@@ -29,8 +29,8 @@ Game.prototype.initialize = function() {
 				 .takeUntil(levelWon.merge(gameLost))
 				 .subscribe(this.level.fireDefenseMissile.bind(this.level));
 
-	updateRequests.takeUntil(levelWon.merge(gameLost))
-				  .subscribe(this.step.bind(this));
+	this.updateRequests.takeUntil(levelWon.merge(gameLost))
+					   .subscribe(this.step.bind(this));
 
 	levelWon.subscribe(this.levelUp.bind(this));
 }
@@ -41,7 +41,7 @@ Game.prototype.levelUp = function() {
 }
 
 Game.prototype.step = function (elapsed) {
-	this.level.updatePositions(elapsed);
+	// this.level.updatePositions(elapsed);
 
 	this.renderer.render(this.level);
 }
@@ -58,7 +58,7 @@ Game.prototype.getUpdateRequests = function() {
 	.publish()
 	.refCount();
 
-	return updateRequests.zip(updateRequests.skip(1), function(t1, t2) { return t2 - t1; });
+	return updateRequests.zip(updateRequests.skip(1), function(t1, t2) { return t2 - t1; });//.sample(1000);
 }
 
 var game = new Game();

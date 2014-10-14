@@ -1,11 +1,18 @@
-function Level(level, previousLevel) {
+function Level(level, updateRequests, previousLevel) {
 	this.cities = [];
 	this.bunkers = [];
 	this.enemyMissiles = [];
 	this.defenseMissiles = [];
 	this.explosions = [];
+
 	this.level = level;
+	this.updateRequests = updateRequests;
 	this.previousLevel = previousLevel;
+
+	var self = this;
+	this.levelUpdates = updateRequests.do(function(elapsed) { self.updatePositions(elapsed); })
+									  .map(function() { return self; })
+									  .share();
 }
 
 Level.prototype.initialize = function() {
@@ -40,7 +47,7 @@ Level.prototype.initializeFromPreviousLevel = function(previousLevel) {
 }
 
 Level.prototype.createNextLevel = function() {
-	return new Level(this.level + 1, this);
+	return new Level(this.level + 1, this.updateRequests, this);
 }
 
 Level.prototype.levelWon = function() {
@@ -69,7 +76,7 @@ Level.prototype.fireEnemyMissile = function() {
 	var target = targets[Math.floor(Math.random() * targets.length)];
 
 	if (target) {
-		var missile = this.createMissile(sourceX, 0, target.x, target.y, 50);
+		var missile = this.createMissile(sourceX, 0, target.x, target.y, false);
 
 		this.enemyMissiles.push(missile);
 		this.remainingEnemyMissiles--;
@@ -83,19 +90,20 @@ Level.prototype.fireDefenseMissile = function(target) {
 		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
 		closestBunker.fireMissile();
 
-		var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, 1000);
+		var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, true);
 		this.defenseMissiles.push(defenseMissile);
 	}
 }
 
-Level.prototype.createMissile = function(sourceX, sourceY, targetX, targetY, speed) {
-	var missile = new Missile(sourceX, sourceY, targetX, targetY, speed);
-	missile.onExploded = this.onMissileExploded.bind(this);
+Level.prototype.createMissile = function(sourceX, sourceY, targetX, targetY, isDefense) {
+	var missile = new Missile(sourceX, sourceY, targetX, targetY, isDefense, this.levelUpdates);
+	missile.onExploded.subscribe(this.onMissileExploded.bind(this));
 
 	return missile;
 }
 
 Level.prototype.updatePositions = function(elapsed) {
+	// console.log('update');
 	var updateables = this.enemyMissiles
 						  .concat(this.defenseMissiles)
 						  .concat(this.explosions);
