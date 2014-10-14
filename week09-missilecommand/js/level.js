@@ -8,11 +8,6 @@ function Level(level, updateRequests, previousLevel) {
 	this.level = level;
 	this.updateRequests = updateRequests;
 	this.previousLevel = previousLevel;
-
-	var self = this;
-	this.levelUpdates = updateRequests.do(function(elapsed) { self.updatePositions(elapsed); })
-									  .map(function() { return self; })
-									  .share();
 }
 
 Level.prototype.initialize = function() {
@@ -29,6 +24,32 @@ Level.prototype.initialize = function() {
 
 	this.totalEnemyMissiles = 5 + this.level * 5;
 	this.remainingEnemyMissiles = this.totalEnemyMissiles;
+
+	var levelUpdates = this.updateRequests.do(this.updatePositions.bind(this)).share();
+
+	var detonations = this.getAllObjectUpdates(levelUpdates)
+						  .where(this.hasObjectExploded.bind(this));
+
+	detonations.subscribe(this.objectExploded.bind(this));
+}
+
+Level.prototype.getAllObjectUpdates = function(levelUpdates) {
+	// Generates an observable of position updates of all live level objects
+	var self = this;
+	return levelUpdates.flatMap(function() { return Rx.Observable.fromArray(self.getAllObjects.call(self)); });
+}
+
+Level.prototype.getAllObjects = function() {
+	return this.cities.concat(this.bunkers).concat(this.enemyMissiles).concat(this.defenseMissiles);
+}
+
+Level.prototype.hasObjectExploded = function(obj) {
+	if (obj.reachedTarget && obj.reachedTarget()) {
+		return true;
+	}
+
+	// Defense missiles don't get destroyed by explosions, as this makes the game very hard to play (this matches the original)
+	return !obj.isDefenseMissile && _.any(this.explosions, function(e) { return e.explodes(obj); });
 }
 
 Level.prototype.initializeNewLevel = function() {
@@ -61,12 +82,9 @@ Level.prototype.levelLost = function() {
 	return !_.any(this.cities) && !_.any(this.explosions); 
 }
 
-Level.prototype.onMissileExploded = function(missile) {
-	this.defenseMissiles = this.defenseMissiles.filter(function (m) { return m != missile });
-	this.enemyMissiles = this.enemyMissiles.filter(function (m) { return m != missile; });
-
-	var explosion = new Explosion(missile.x, missile.y);
-	this.explosions.push(explosion);
+Level.prototype.objectExploded = function(obj) {
+	obj.isAlive = false;
+	this.explosions.push(new Explosion(obj.x, obj.y));
 }
 
 Level.prototype.fireEnemyMissile = function() {
@@ -76,7 +94,7 @@ Level.prototype.fireEnemyMissile = function() {
 	var target = targets[Math.floor(Math.random() * targets.length)];
 
 	if (target) {
-		var missile = this.createMissile(sourceX, 0, target.x, target.y, false);
+		var missile = new Missile(sourceX, 0, target.x, target.y, false);
 
 		this.enemyMissiles.push(missile);
 		this.remainingEnemyMissiles--;
@@ -90,20 +108,12 @@ Level.prototype.fireDefenseMissile = function(target) {
 		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
 		closestBunker.fireMissile();
 
-		var defenseMissile = this.createMissile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, true);
+		var defenseMissile = new Missile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, true);
 		this.defenseMissiles.push(defenseMissile);
 	}
 }
 
-Level.prototype.createMissile = function(sourceX, sourceY, targetX, targetY, isDefense) {
-	var missile = new Missile(sourceX, sourceY, targetX, targetY, isDefense, this.levelUpdates);
-	missile.onExploded.subscribe(this.onMissileExploded.bind(this));
-
-	return missile;
-}
-
 Level.prototype.updatePositions = function(elapsed) {
-	// console.log('update');
 	var updateables = this.enemyMissiles
 						  .concat(this.defenseMissiles)
 						  .concat(this.explosions);
@@ -114,22 +124,11 @@ Level.prototype.updatePositions = function(elapsed) {
 }
 
 Level.prototype.checkForDestroyedObjects = function() {
-	var self = this;
-
-	this.explosions.forEach(function(e) {
-		var explodedObjects = self.enemyMissiles.concat(self.bunkers).concat(self.cities)
-								  .filter(function(m) { return m.isAlive && e.explodes(m); });
-
-		explodedObjects.forEach(function(m) {
-			self.explosions.push(new Explosion(m.x, m.y));
-			m.isAlive = false;
-		});
-	});
-
 	this.removeDeadObjects(this.explosions);
 	this.removeDeadObjects(this.cities);
 	this.removeDeadObjects(this.bunkers);
 	this.removeDeadObjects(this.enemyMissiles);
+	this.removeDeadObjects(this.defenseMissiles);
 }
 
 Level.prototype.removeDeadObjects = function(items) {

@@ -1,4 +1,4 @@
-function Missile(sourceX, sourceY, targetX, targetY, isDefenseMissile, levelUpdates) {
+function Missile(sourceX, sourceY, targetX, targetY, isDefenseMissile) {
 	this.x = this.sourceX = sourceX;
 	this.y = this.sourceY = sourceY;
 	this.targetX = targetX;
@@ -11,19 +11,6 @@ function Missile(sourceX, sourceY, targetX, targetY, isDefenseMissile, levelUpda
 	this.ySpeed = (targetY - sourceY) * this.speed / this.targetDistance;
 
 	this.isAlive = true;
-
-	var self = this;
-	var detonation = levelUpdates.where(this.reachedTarget.bind(this));
-	var destroyedByExplosion = levelUpdates.where(this.isDestroyedByExplosion.bind(this));
-
-	self.onExploded = detonation.merge(destroyedByExplosion)
-							 	.take(1)
-							 	.map(function() { return self; });
-}
-
-Missile.prototype.isDestroyedByExplosion = function(levelState) {
-	var self = this;
-	return !this.isDefenseMissile && _.any(levelState.explosions, function(e) { return e.explodes(self); });
 }
 
 Missile.prototype.reachedTarget = function() {

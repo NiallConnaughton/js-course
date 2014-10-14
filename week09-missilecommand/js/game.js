@@ -6,9 +6,13 @@ function Game() {
 	this.score = 0;
 	this.updateRequests = this.getUpdateRequests();
 	this.level = new Level(1, this.updateRequests);
+	this.mouseDowns = Rx.Observable.fromEvent(canvas, "mousedown").share();
+
+	this.mouseDowns.take(1).subscribe(this.initialize.bind(this));
 }
 
 Game.prototype.initialize = function() {
+	var self = this;
 	this.level.initialize();
 
 	var gameLost = this.updateRequests.where(this.level.levelLost.bind(this.level))
@@ -25,12 +29,11 @@ Game.prototype.initialize = function() {
 			  .takeUntil(gameLost)
 			  .subscribe(this.level.fireEnemyMissile.bind(this.level));
 
-	Rx.Observable.fromEvent(canvas, "mousedown")
-				 .takeUntil(levelWon.merge(gameLost))
-				 .subscribe(this.level.fireDefenseMissile.bind(this.level));
+	this.mouseDowns.takeUntil(levelWon.merge(gameLost))
+				   .subscribe(this.level.fireDefenseMissile.bind(this.level));
 
 	this.updateRequests.takeUntil(levelWon.merge(gameLost))
-					   .subscribe(this.step.bind(this));
+					   .subscribe(this.render.bind(this));
 
 	levelWon.subscribe(this.levelUp.bind(this));
 }
@@ -40,9 +43,7 @@ Game.prototype.levelUp = function() {
 	this.initialize();
 }
 
-Game.prototype.step = function (elapsed) {
-	// this.level.updatePositions(elapsed);
-
+Game.prototype.render = function () {
 	this.renderer.render(this.level);
 }
 
@@ -62,4 +63,3 @@ Game.prototype.getUpdateRequests = function() {
 }
 
 var game = new Game();
-game.initialize();
