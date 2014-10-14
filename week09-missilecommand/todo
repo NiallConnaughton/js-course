@@ -6,9 +6,12 @@ points for each bunker remaining at end of level
 
 Design
 RX
-	update positions as observable - zip all positions together?
-	detect collisions as observable events
-	dying/closing objects as observable or complete of event
+	move level lost/won into Level
+	expose level ended state as observable
+	game moves to next level if level won, shows game over if level lost
+
+	move enemy missile launches into level
+	have level take defense missile launches as an observable
 inheritance of isAlive, x, y, etc
 
 UI
