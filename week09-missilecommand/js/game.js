@@ -26,9 +26,16 @@ Game.prototype.levelFinished = function(levelWon) {
 		var remainingMissiles = _(this.level.bunkers).reduce(
 			function(total, bunker) { return total + bunker.remainingMissiles; },
 			0);
-		this.score += this.level.cities.length * 500 + remainingMissiles * 50;
+
+		this.score += this.level.cities.length * 500
+						+ this.level.bunkers.length * 200
+						+ remainingMissiles * 50;
+
 		console.log('Level complete, score' + this.score);
 		this.levelUp();
+	}
+	else {
+		$('#gameover').toggleClass('dialogHidden');
 	}
 }
 
