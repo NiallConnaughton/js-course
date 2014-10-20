@@ -9,6 +9,25 @@ function Level(level, updateRequests, userClicks, previousLevel) {
 	this.updateRequests = updateRequests;
 	this.userClicks = userClicks;
 	this.previousLevel = previousLevel;
+
+	this.subscriptions = new Rx.CompositeDisposable();
+	this.levelFinished = this.getLevelFinished();
+}
+
+Level.prototype.getLevelFinished = function() {
+	var self = this;
+
+	var levelLost = this.updateRequests.where(this.isLevelLost.bind(this))
+									   .map(function() { return false; });
+
+	var levelWon = this.updateRequests.where(this.isLevelWon.bind(this))
+									  .map(function() { return true; });
+
+	var levelFinished = levelLost.merge(levelWon)
+								 .do(function() { self.subscriptions.dispose(); })
+								 .take(1);
+
+	return levelFinished;
 }
 
 Level.prototype.initialize = function() {
@@ -19,23 +38,23 @@ Level.prototype.initialize = function() {
 		this.initializeNewLevel();
 	}
 
-	var totalDefenseMissiles = 20 + this.level * 3;
+	var totalDefenseMissiles = 25 + this.level * 3;
 	var missilesPerBunker = Math.floor(totalDefenseMissiles / this.bunkers.length);
 	this.bunkers.forEach(function(b) { b.initialize(missilesPerBunker); });
 
-	this.totalEnemyMissiles = 5 + this.level * 5;
-	this.remainingEnemyMissiles = this.totalEnemyMissiles;
+	var totalEnemyMissiles = 5 + this.level * 5;
+	this.remainingEnemyMissiles = totalEnemyMissiles;
 
 	var levelUpdates = this.updateRequests.do(this.updatePositions.bind(this)).share();
 
 	var detonations = this.getAllObjectUpdates(levelUpdates)
 						  .where(this.hasObjectExploded.bind(this));
 
-	var launches = this.getEnemyMissileLaunches()
-					   .merge(this.getDefenseMissileLaunches())
-					   .subscribe(this.launchMissile.bind(this));
-
-	detonations.subscribe(this.objectExploded.bind(this));
+	var missileLaunches = this.getEnemyMissileLaunches(totalEnemyMissiles)
+							  .merge(this.getDefenseMissileLaunches());
+	
+	this.subscriptions.add(detonations.subscribe(this.objectExploded.bind(this)));
+	this.subscriptions.add(missileLaunches.subscribe(this.launchMissile.bind(this)));
 }
 
 Level.prototype.getAllObjectUpdates = function(levelUpdates) {
@@ -76,14 +95,14 @@ Level.prototype.createNextLevel = function() {
 	return new Level(this.level + 1, this.updateRequests, this.userClicks, this);
 }
 
-Level.prototype.levelWon = function() {
+Level.prototype.isLevelWon = function() {
 	// the level is won when there are no more missiles remaining to be fired, none in flight,
 	// and no explosions that could possibly still kill a city
 
 	return this.remainingEnemyMissiles === 0 && !_.any(this.enemyMissiles) && !_.any(this.explosions);
 }
 
-Level.prototype.levelLost = function() {
+Level.prototype.isLevelLost = function() {
 	return !_.any(this.cities) && !_.any(this.explosions); 
 }
 
@@ -155,15 +174,15 @@ Level.prototype.getDefenseMissileLaunches = function() {
 			   .takeWhile(function(m) { return m; })	
 }
 
-Level.prototype.getEnemyMissileLaunches = function() {
+Level.prototype.getEnemyMissileLaunches = function(totalEnemyMissiles) {
 	// level should last around 15 seconds
 
-	var averageGap = 15000 / this.totalEnemyMissiles;
+	var averageGap = 15000 / totalEnemyMissiles;
 
-	console.log('level ' + this.level + ': ' + this.totalEnemyMissiles + ' missiles, launched every ' + averageGap + 'ms.');
+	console.log('level ' + this.level + ': ' + totalEnemyMissiles + ' missiles, launched every ' + averageGap + 'ms.');
 
 	var delays = [];
-	for (var i = 0; i < this.totalEnemyMissiles; i++) {
+	for (var i = 0; i < totalEnemyMissiles; i++) {
 		delays.push(Math.random() * averageGap * 2);
 	}
 

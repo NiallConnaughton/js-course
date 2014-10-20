@@ -15,20 +15,16 @@ Game.prototype.initialize = function() {
 	var self = this;
 	this.level.initialize();
 
-	var gameLost = this.updateRequests.where(this.level.levelLost.bind(this.level))
-								 	  .take(1);
-
-	var levelWon = this.updateRequests.where(this.level.levelWon.bind(this.level))
-									  .takeUntil(gameLost)
-									  .take(1);
-
-	gameLost.subscribe(function() { console.log('GAME OVER, MAN!'); });
-	levelWon.subscribe(function() { console.log('WINNERS DON\'T USE DRUGS'); });
-
-	this.updateRequests.takeUntil(levelWon.merge(gameLost))
+	this.updateRequests.takeUntil(this.level.levelFinished)
 					   .subscribe(this.render.bind(this));
 
-	levelWon.subscribe(this.levelUp.bind(this));
+	this.level.levelFinished.subscribe(this.levelFinished.bind(this));
+}
+
+Game.prototype.levelFinished = function(levelWon) {
+	if (levelWon) {
+		this.levelUp();
+	}
 }
 
 Game.prototype.levelUp = function() { 

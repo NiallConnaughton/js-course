@@ -10,8 +10,6 @@ RX
 	expose level ended state as observable
 	game moves to next level if level won, shows game over if level lost
 
-	move enemy missile launches into level
-	have level take defense missile launches as an observable
 inheritance of isAlive, x, y, etc
 
 UI
