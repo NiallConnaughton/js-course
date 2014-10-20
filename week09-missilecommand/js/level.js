@@ -1,4 +1,4 @@
-function Level(level, updateRequests, previousLevel) {
+function Level(level, updateRequests, userClicks, previousLevel) {
 	this.cities = [];
 	this.bunkers = [];
 	this.enemyMissiles = [];
@@ -7,6 +7,7 @@ function Level(level, updateRequests, previousLevel) {
 
 	this.level = level;
 	this.updateRequests = updateRequests;
+	this.userClicks = userClicks;
 	this.previousLevel = previousLevel;
 }
 
@@ -29,6 +30,10 @@ Level.prototype.initialize = function() {
 
 	var detonations = this.getAllObjectUpdates(levelUpdates)
 						  .where(this.hasObjectExploded.bind(this));
+
+	var launches = this.getEnemyMissileLaunches()
+					   .merge(this.getDefenseMissileLaunches())
+					   .subscribe(this.launchMissile.bind(this));
 
 	detonations.subscribe(this.objectExploded.bind(this));
 }
@@ -68,7 +73,7 @@ Level.prototype.initializeFromPreviousLevel = function(previousLevel) {
 }
 
 Level.prototype.createNextLevel = function() {
-	return new Level(this.level + 1, this.updateRequests, this);
+	return new Level(this.level + 1, this.updateRequests, this.userClicks, this);
 }
 
 Level.prototype.levelWon = function() {
@@ -87,29 +92,34 @@ Level.prototype.objectExploded = function(obj) {
 	this.explosions.push(new Explosion(obj.x, obj.y));
 }
 
-Level.prototype.fireEnemyMissile = function() {
-	var sourceX = Math.random() * canvas.width;
-
-	var targets = this.cities.concat(this.bunkers);
-	var target = targets[Math.floor(Math.random() * targets.length)];
-
-	if (target) {
-		var missile = new Missile(sourceX, 0, target.x, target.y, false);
-
+Level.prototype.launchMissile = function(missile) {
+	if (missile.isDefenseMissile) {
+		this.defenseMissiles.push(missile);
+	}
+	else {
 		this.enemyMissiles.push(missile);
 		this.remainingEnemyMissiles--;
 	}
 }
 
-Level.prototype.fireDefenseMissile = function(target) {
+Level.prototype.createEnemyMissile = function() {
+	var sourceX = Math.random() * canvas.width;
+
+	var targets = this.cities.concat(this.bunkers);
+	var target = targets[Math.floor(Math.random() * targets.length)];
+
+	if (target)
+		return new Missile(sourceX, 0, target.x, target.y, false);
+}
+
+Level.prototype.createDefenseMissile = function(target) {
 	var remainingBunkers = this.bunkers.filter(function(b) { return b.remainingMissiles > 0; });
 
 	if (_.any(remainingBunkers)) {
 		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
 		closestBunker.fireMissile();
 
-		var defenseMissile = new Missile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, true);
-		this.defenseMissiles.push(defenseMissile);
+		return new Missile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, true);
 	}
 }
 
@@ -139,6 +149,12 @@ Level.prototype.removeDeadObjects = function(items) {
 	}
 }
 
+Level.prototype.getDefenseMissileLaunches = function() {
+	return this.userClicks
+			   .map(this.createDefenseMissile.bind(this))
+			   .takeWhile(function(m) { return m; })	
+}
+
 Level.prototype.getEnemyMissileLaunches = function() {
 	// level should last around 15 seconds
 
@@ -151,8 +167,11 @@ Level.prototype.getEnemyMissileLaunches = function() {
 		delays.push(Math.random() * averageGap * 2);
 	}
 
+	// var self = this;
 	// take the launch times and map them to observable timers that will fire at the launch time
-	return Rx.Observable.for(delays, function(d) { return Rx.Observable.timer(d); });
+	return Rx.Observable.for(delays, function(d) { return Rx.Observable.timer(d); })
+						.map(this.createEnemyMissile.bind(this))
+						.takeWhile(function(m) { return m; });
 	
 	// for great justice, replace the line above with this. No idea why it does that.
 	// return Rx.Observable.for(delays, Rx.Observable.timer);

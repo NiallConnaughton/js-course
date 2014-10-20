@@ -5,8 +5,8 @@ function Game() {
 	this.renderer = new Renderer();
 	this.score = 0;
 	this.updateRequests = this.getUpdateRequests();
-	this.level = new Level(1, this.updateRequests);
 	this.mouseDowns = Rx.Observable.fromEvent(canvas, "mousedown").share();
+	this.level = new Level(1, this.updateRequests, this.mouseDowns);
 
 	this.mouseDowns.take(1).subscribe(this.initialize.bind(this));
 }
@@ -24,13 +24,6 @@ Game.prototype.initialize = function() {
 
 	gameLost.subscribe(function() { console.log('GAME OVER, MAN!'); });
 	levelWon.subscribe(function() { console.log('WINNERS DON\'T USE DRUGS'); });
-
-	this.level.getEnemyMissileLaunches()
-			  .takeUntil(gameLost)
-			  .subscribe(this.level.fireEnemyMissile.bind(this.level));
-
-	this.mouseDowns.takeUntil(levelWon.merge(gameLost))
-				   .subscribe(this.level.fireDefenseMissile.bind(this.level));
 
 	this.updateRequests.takeUntil(levelWon.merge(gameLost))
 					   .subscribe(this.render.bind(this));
