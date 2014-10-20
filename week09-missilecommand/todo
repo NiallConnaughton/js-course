@@ -6,8 +6,6 @@ points for each bunker remaining at end of level
 
 Design
 RX
-	move level lost/won into Level
-	expose level ended state as observable
 	game moves to next level if level won, shows game over if level lost
 
 inheritance of isAlive, x, y, etc
