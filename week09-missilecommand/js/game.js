@@ -1,5 +1,6 @@
 var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d'); 
+var $canvas = $(canvas);
+var ctx = canvas.getContext('2d');
 
 function Game() {
 	this.renderer = new Renderer();
@@ -9,6 +10,8 @@ function Game() {
 	this.level = new Level(1, this.updateRequests, this.mouseDowns);
 
 	this.mouseDowns.take(1).subscribe(this.initialize.bind(this));
+
+	this.centreElement($canvas);
 }
 
 Game.prototype.initialize = function() {
@@ -19,6 +22,12 @@ Game.prototype.initialize = function() {
 					   .subscribe(this.render.bind(this));
 
 	this.level.levelFinished.subscribe(this.levelFinished.bind(this));
+}
+
+Game.prototype.centreElement = function($element) {
+	var left = ($(document.body).width() - $element.width()) / 2;
+	var top = ($(document.body).height() - $element.height()) / 2;
+	$element.css({left: left, top: top});
 }
 
 Game.prototype.levelFinished = function(levelWon) {
@@ -35,7 +44,18 @@ Game.prototype.levelFinished = function(levelWon) {
 		this.levelUp();
 	}
 	else {
-		$('#gameover').toggleClass('dialogHidden');
+		var $gameover = $('#gameover');
+		$gameover.toggleClass('dialogHidden');
+		this.centreElement($gameover);
+
+		// var canvasPosition = $canvas.position();
+		// var gameoverLeft = canvasPosition.left + ($canvas.width() - $gameover.width()) / 2;
+
+		// console.log(canvasPosition);
+		// console.log($canvas.width());
+		// console.log($gameover.width());
+
+		// $gameover.css({left: gameoverLeft});
 	}
 }
 
