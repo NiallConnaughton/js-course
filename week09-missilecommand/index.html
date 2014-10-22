@@ -8,8 +8,18 @@
 <body>
 	<canvas width="800" height="600" id="canvas"></canvas>
 
-    <div id="gameover" title="GAME OVER" class="dialogHidden">
-        <p>GAME OVER, MAN</p>
+    <div id="gameover" class="dialog dialogHidden">
+        <span class="gameoverTitle">GAME OVER</span><br/>
+        <p class="finalScores">Final score: <span id="finalScore"></span>
+            Final level: <span id="finalLevel"></span></p>
+        <p class="centerText">Winners do not take drugs</p>
+    </div>
+
+    <div id="mainMenu" class="dialog dialogHidden">
+        <span class="gameoverTitle">Missile Command</span>
+        <p>
+            <button id="startNewGameButton">Start Game</button>
+        </p>
     </div>
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

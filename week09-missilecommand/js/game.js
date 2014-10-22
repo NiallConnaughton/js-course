@@ -1,21 +1,35 @@
 var canvas = document.getElementById('canvas');
 var $canvas = $(canvas);
+var $gameover = $('#gameover');
+var $mainMenuDialog = $('#mainMenu');
+var $startGameButton = $('#startNewGameButton');
 var ctx = canvas.getContext('2d');
 
 function Game() {
 	this.renderer = new Renderer();
-	this.score = 0;
 	this.updateRequests = this.getUpdateRequests();
 	this.mouseDowns = Rx.Observable.fromEvent(canvas, "mousedown").share();
-	this.level = new Level(1, this.updateRequests, this.mouseDowns);
 
-	this.mouseDowns.take(1).subscribe(this.initialize.bind(this));
-
+	$startGameButton.click(this.startNewGame.bind(this));
 	this.centreElement($canvas);
 }
 
-Game.prototype.initialize = function() {
+Game.prototype.showMainMenu = function() {
+	this.showDialogs($mainMenuDialog);
+	this.hideDialogs($gameover);
+}
+
+Game.prototype.startNewGame = function() {
 	var self = this;
+	this.score = 0;
+
+	this.hideDialogs($mainMenuDialog, $gameover);
+
+	this.level = new Level(1, this.updateRequests, this.mouseDowns);
+	this.startLevel();
+}
+
+Game.prototype.startLevel = function() {
 	this.level.initialize();
 
 	this.updateRequests.takeUntil(this.level.levelFinished)
@@ -44,24 +58,17 @@ Game.prototype.levelFinished = function(levelWon) {
 		this.levelUp();
 	}
 	else {
-		var $gameover = $('#gameover');
-		$gameover.toggleClass('dialogHidden');
-		this.centreElement($gameover);
-
-		// var canvasPosition = $canvas.position();
-		// var gameoverLeft = canvasPosition.left + ($canvas.width() - $gameover.width()) / 2;
-
-		// console.log(canvasPosition);
-		// console.log($canvas.width());
-		// console.log($gameover.width());
-
-		// $gameover.css({left: gameoverLeft});
+		this.showDialogs($gameover);
+		Rx.Observable.timer(10000).subscribe(this.showMainMenu.bind(this));
+		$('#finalScore').html(this.score);
+		$('#finalLevel').html(this.level.level);
 	}
 }
 
-Game.prototype.levelUp = function() { 
+Game.prototype.levelUp = function() {
+	console.log(this);
 	this.level = this.level.createNextLevel();
-	this.initialize();
+	this.startLevel();
 }
 
 Game.prototype.render = function () {
@@ -83,4 +90,19 @@ Game.prototype.getUpdateRequests = function() {
 	return updateRequests.zip(updateRequests.skip(1), function(t1, t2) { return t2 - t1; });//.sample(1000);
 }
 
+Game.prototype.showDialogs = function() {
+	for (var i = 0; i < arguments.length; i++) {
+		this.centreElement(arguments[i]);
+		arguments[i].removeClass('dialogHidden');
+	};
+}
+
+Game.prototype.hideDialogs = function() {
+	for (var i = 0; i < arguments.length; i++) {
+		arguments[i].addClass('dialogHidden');
+	};
+}
+
+
 var game = new Game();
+game.showMainMenu();
