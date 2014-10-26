@@ -63,7 +63,11 @@ Level.prototype.initialize = function(isDemo) {
 	if (isDemo) {
 		var launches = this.launches.map(function (launch) {
 											return Rx.Observable.timer(launch.timeOffset)
-																.map(function() { return launch; });
+																.map(function() {
+																	var missile = new Missile(0, 0, 0, 0, launch.missile.isDefenseMissile);
+																	$.extend(missile, launch.missile);
+																	return { missile: missile }
+																});
 								   		});
 
 		// console.log(this.launches);
@@ -175,7 +179,9 @@ Level.prototype.updatePositions = function(elapsed) {
 						  .concat(this.defenseMissiles)
 						  .concat(this.explosions);
 
-	console.log(updateables);
+	// if (updateables.length > 0) {
+	// 	console.log(updateables);
+	// }
 
 	updateables.forEach(function(u) { u.updatePosition(elapsed); } );
 
