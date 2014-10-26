@@ -3,6 +3,7 @@ var $canvas = $(canvas);
 var $gameover = $('#gameover');
 var $mainMenuDialog = $('#mainMenu');
 var $startGameButton = $('#startNewGameButton');
+var $replayLastGameButton = $('#replayLastGameButton');
 var ctx = canvas.getContext('2d');
 
 function Game() {
@@ -11,6 +12,7 @@ function Game() {
 	this.mouseDowns = Rx.Observable.fromEvent(canvas, "mousedown").share();
 
 	$startGameButton.click(this.startNewGame.bind(this));
+	$replayLastGameButton.click(this.replayLastGame.bind(this));
 	this.centreElement($canvas);
 }
 
@@ -20,7 +22,7 @@ Game.prototype.showMainMenu = function() {
 }
 
 Game.prototype.startNewGame = function() {
-	var self = this;
+	this.levels = [];
 	this.score = 0;
 
 	this.hideDialogs($mainMenuDialog, $gameover);
@@ -29,13 +31,32 @@ Game.prototype.startNewGame = function() {
 	this.startLevel();
 }
 
-Game.prototype.startLevel = function() {
-	this.level.initialize();
+Game.prototype.replayLastGame = function() {
+	this.hideDialogs($mainMenuDialog, $gameover);
+	var savedGame = sessionStorage.getItem('lastGame');
+	var lastGame = JSON.parse(savedGame);
+	// console.log(savedGame);
+	console.log(lastGame);
+
+	this.levels = new Array(lastGame.levels.length);
+	// $.extend(this, lastGame);
+	console.log('Replaying ' + this.levels.length + ' levels');
+
+	this.level = new Level(1, this.updateRequests, Rx.Observable.never());
+	this.level.launches = lastGame.levels[0].launches;
+	console.log(this.level);
+	this.startLevel(true);
+}
+
+Game.prototype.startLevel = function(isReplay) {
+	this.level.initialize(isReplay);
 
 	this.updateRequests.takeUntil(this.level.levelFinished)
 					   .subscribe(this.render.bind(this));
 
 	this.level.levelFinished.subscribe(this.levelFinished.bind(this));
+
+	this.levels.push(this.level);
 }
 
 Game.prototype.centreElement = function($element) {
@@ -62,11 +83,19 @@ Game.prototype.levelFinished = function(levelWon) {
 		Rx.Observable.timer(10000).subscribe(this.showMainMenu.bind(this));
 		$('#finalScore').html(this.score);
 		$('#finalLevel').html(this.level.level);
+
+		var savedGame = this.getSavedGame();
+		console.log(savedGame);
+		sessionStorage.setItem('lastGame', JSON.stringify(savedGame));
 	}
 }
 
+Game.prototype.getSavedGame = function() {
+	var levelLaunches = this.levels.map(function(l) { return { launches: l.launches }; });
+	return { score: this.score, levels: levelLaunches };
+}
+
 Game.prototype.levelUp = function() {
-	console.log(this);
 	this.level = this.level.createNextLevel();
 	this.startLevel();
 }

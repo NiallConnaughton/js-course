@@ -4,6 +4,7 @@ function Level(level, updateRequests, userClicks, previousLevel) {
 	this.enemyMissiles = [];
 	this.defenseMissiles = [];
 	this.explosions = [];
+	this.launches = [];
 
 	this.level = level;
 	this.updateRequests = updateRequests;
@@ -30,7 +31,10 @@ Level.prototype.getLevelFinished = function() {
 	return levelFinished;
 }
 
-Level.prototype.initialize = function() {
+Level.prototype.initialize = function(isDemo) {
+	this.isDemo = isDemo;
+	var start = Date.now();
+
 	if (this.previousLevel) {
 		this.initializeFromPreviousLevel(this.previousLevel);
 	}
@@ -51,10 +55,31 @@ Level.prototype.initialize = function() {
 						  .where(this.hasObjectExploded.bind(this));
 
 	var missileLaunches = this.getEnemyMissileLaunches(totalEnemyMissiles)
-							  .merge(this.getDefenseMissileLaunches());
-	
+							  .merge(this.getDefenseMissileLaunches())
+							  .timestamp()
+							  .map(function (launch) { return { missile: launch.value, timeOffset: launch.timestamp - start }; })
+							  .do(this.recordMissileLaunch.bind(this));
+
+	if (isDemo) {
+		var launches = this.launches.map(function (launch) {
+											return Rx.Observable.timer(launch.timeOffset)
+																.map(function() { return launch; });
+								   		});
+
+		// console.log(this.launches);
+
+		missileLaunches = Rx.Observable.fromArray(launches).mergeAll();
+										// .do(function(l) { console.log(l); });
+	}
+
 	this.subscriptions.add(detonations.subscribe(this.objectExploded.bind(this)));
 	this.subscriptions.add(missileLaunches.subscribe(this.launchMissile.bind(this)));
+}
+
+Level.prototype.recordMissileLaunch = function(launch) {
+	if (!this.isDemo) {
+		this.launches.push(launch);
+	}
 }
 
 Level.prototype.getAllObjectUpdates = function(levelUpdates) {
@@ -111,7 +136,10 @@ Level.prototype.objectExploded = function(obj) {
 	this.explosions.push(new Explosion(obj.x, obj.y));
 }
 
-Level.prototype.launchMissile = function(missile) {
+Level.prototype.launchMissile = function(launch) {
+	var missile = launch.missile;
+	console.log(launch);
+
 	if (missile.isDefenseMissile) {
 		this.defenseMissiles.push(missile);
 	}
@@ -146,6 +174,8 @@ Level.prototype.updatePositions = function(elapsed) {
 	var updateables = this.enemyMissiles
 						  .concat(this.defenseMissiles)
 						  .concat(this.explosions);
+
+	console.log(updateables);
 
 	updateables.forEach(function(u) { u.updatePosition(elapsed); } );
 
