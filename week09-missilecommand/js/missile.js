@@ -21,6 +21,11 @@ Missile.prototype.reachedTarget = function() {
 Missile.prototype.updatePosition = function(elapsed) {
 	this.x += this.xSpeed * (elapsed / 1000);
 	this.y += this.ySpeed * (elapsed / 1000);
+
+	if (this.reachedTarget()) {
+		this.x = this.targetX;
+		this.y = this.targetY;
+	}
 }
 
 Missile.prototype.getDistance = function(sourceX, sourceY, targetX, targetY) {
