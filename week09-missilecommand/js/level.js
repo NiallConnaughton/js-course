@@ -54,21 +54,7 @@ Level.prototype.initialize = function(isDemo) {
 	var detonations = this.getAllObjectUpdates(levelUpdates)
 						  .where(this.hasObjectExploded.bind(this));
 
-	var enemyMissiles;
-	if (!isDemo) {
-		enemyMissiles = this.getEnemyMissileLaunches(totalEnemyMissiles);
-	}
-	else {
-		var enemyLaunches = _.filter(this.launches, function(l) { return !l.missile.isDefenseMissile; });
-
-		enemyMissiles = Rx.Observable.fromArray(enemyLaunches)
-									 .map(function (l) {
-									 	var missile = new Missile(l.missile.sourceX, l.missile.sourceY, l.missile.targetX, l.missile.targetY, false);
-									 	return Rx.Observable.return(missile).delay(l.timeOffset);
-									 })
-									 .mergeAll();
-	}
-
+	var enemyMissiles = isDemo ? this.getReplayedEnemyMissileLaunches() : this.getEnemyMissileLaunches(totalEnemyMissiles);
 	var missileLaunches = enemyMissiles
 							  .merge(this.getDefenseMissileLaunches())
 							  .timestamp()
@@ -224,4 +210,17 @@ Level.prototype.getEnemyMissileLaunches = function(totalEnemyMissiles) {
 	
 	// for great justice, replace the line above with this. No idea why it does that.
 	// return Rx.Observable.for(delays, Rx.Observable.timer);
+}
+
+Level.prototype.getReplayedEnemyMissileLaunches = function() {
+	var enemyLaunches = _.filter(this.launches, function(l) { return !l.missile.isDefenseMissile; });
+
+	var enemyMissiles = Rx.Observable.fromArray(enemyLaunches)
+									 .map(function (l) {
+									 	var missile = new Missile(l.missile.sourceX, l.missile.sourceY, l.missile.targetX, l.missile.targetY, false);
+									 	return Rx.Observable.return(missile).delay(l.timeOffset);
+								 	 })
+								 	 .mergeAll();
+
+	return enemyMissiles;
 }
