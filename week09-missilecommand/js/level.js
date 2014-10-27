@@ -141,7 +141,6 @@ Level.prototype.objectExploded = function(obj) {
 
 Level.prototype.launchMissile = function(launch) {
 	var missile = launch.missile;
-	// console.log(launch);
 
 	if (missile.isDefenseMissile) {
 		this.defenseMissiles.push(missile);
@@ -177,10 +176,6 @@ Level.prototype.updatePositions = function(elapsed) {
 	var updateables = this.enemyMissiles
 						  .concat(this.defenseMissiles)
 						  .concat(this.explosions);
-
-	// if (updateables.length > 0) {
-	// 	console.log(updateables);
-	// }
 
 	updateables.forEach(function(u) { u.updatePosition(elapsed); } );
 
