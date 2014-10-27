@@ -35,16 +35,19 @@ Game.prototype.replayLastGame = function() {
 	this.hideDialogs($mainMenuDialog, $gameover);
 	var savedGame = sessionStorage.getItem('lastGame');
 	var lastGame = JSON.parse(savedGame);
-	// console.log(savedGame);
-	console.log(lastGame);
 
 	this.levels = new Array(lastGame.levels.length);
-	// $.extend(this, lastGame);
 	console.log('Replaying ' + this.levels.length + ' levels');
 
-	this.level = new Level(1, this.updateRequests, Rx.Observable.never());
+	var defenseLaunches = _.filter(lastGame.levels[0].launches, function (l) { return l.missile.isDefenseMissile; });
+	var mouseClicks = Rx.Observable.fromArray(defenseLaunches)
+								   .map(function (l) {
+									   	var target = { offsetX: l.missile.targetX, offsetY: l.missile.targetY };
+									   	return Rx.Observable.return(target).delay(l.timeOffset);
+								   	});
+
+	this.level = new Level(1, this.updateRequests, mouseClicks.mergeAll());
 	this.level.launches = lastGame.levels[0].launches;
-	console.log(this.level);
 	this.startLevel(true);
 }
 
@@ -57,12 +60,6 @@ Game.prototype.startLevel = function(isReplay) {
 	this.level.levelFinished.subscribe(this.levelFinished.bind(this));
 
 	this.levels.push(this.level);
-}
-
-Game.prototype.centreElement = function($element) {
-	var left = ($(document.body).width() - $element.width()) / 2;
-	var top = ($(document.body).height() - $element.height()) / 2;
-	$element.css({left: left, top: top});
 }
 
 Game.prototype.levelFinished = function(levelWon) {
@@ -85,7 +82,6 @@ Game.prototype.levelFinished = function(levelWon) {
 		$('#finalLevel').html(this.level.level);
 
 		var savedGame = this.getSavedGame();
-		console.log(savedGame);
 		sessionStorage.setItem('lastGame', JSON.stringify(savedGame));
 	}
 }
@@ -113,10 +109,9 @@ Game.prototype.getUpdateRequests = function() {
 
 		window.requestAnimationFrame(handleAnimationFrame);	
 	})
-	.publish()
-	.refCount();
+	.share();
 
-	return updateRequests.zip(updateRequests.skip(1), function(t1, t2) { return t2 - t1; });//.sample(1000);
+	return updateRequests.zip(updateRequests.skip(1), function(t1, t2) { return t2 - t1; });
 }
 
 Game.prototype.showDialogs = function() {
@@ -132,6 +127,11 @@ Game.prototype.hideDialogs = function() {
 	};
 }
 
+Game.prototype.centreElement = function($element) {
+	var left = ($(document.body).width() - $element.width()) / 2;
+	var top = ($(document.body).height() - $element.height()) / 2;
+	$element.css({left: left, top: top});
+}
 
 var game = new Game();
 game.showMainMenu();

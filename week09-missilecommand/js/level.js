@@ -54,27 +54,26 @@ Level.prototype.initialize = function(isDemo) {
 	var detonations = this.getAllObjectUpdates(levelUpdates)
 						  .where(this.hasObjectExploded.bind(this));
 
-	var missileLaunches = this.getEnemyMissileLaunches(totalEnemyMissiles)
+	var enemyMissiles;
+	if (!isDemo) {
+		enemyMissiles = this.getEnemyMissileLaunches(totalEnemyMissiles);
+	}
+	else {
+		var enemyLaunches = _.filter(this.launches, function(l) { return !l.missile.isDefenseMissile; });
+
+		enemyMissiles = Rx.Observable.fromArray(enemyLaunches)
+									 .map(function (l) {
+									 	var missile = new Missile(l.missile.sourceX, l.missile.sourceY, l.missile.targetX, l.missile.targetY, false);
+									 	return Rx.Observable.return(missile).delay(l.timeOffset);
+									 })
+									 .mergeAll();
+	}
+
+	var missileLaunches = enemyMissiles
 							  .merge(this.getDefenseMissileLaunches())
 							  .timestamp()
 							  .map(function (launch) { return { missile: launch.value, timeOffset: launch.timestamp - start }; })
 							  .do(this.recordMissileLaunch.bind(this));
-
-	if (isDemo) {
-		var launches = this.launches.map(function (launch) {
-											return Rx.Observable.timer(launch.timeOffset)
-																.map(function() {
-																	var missile = new Missile(0, 0, 0, 0, launch.missile.isDefenseMissile);
-																	$.extend(missile, launch.missile);
-																	return { missile: missile }
-																});
-								   		});
-
-		// console.log(this.launches);
-
-		missileLaunches = Rx.Observable.fromArray(launches).mergeAll();
-										// .do(function(l) { console.log(l); });
-	}
 
 	this.subscriptions.add(detonations.subscribe(this.objectExploded.bind(this)));
 	this.subscriptions.add(missileLaunches.subscribe(this.launchMissile.bind(this)));
@@ -142,7 +141,7 @@ Level.prototype.objectExploded = function(obj) {
 
 Level.prototype.launchMissile = function(launch) {
 	var missile = launch.missile;
-	console.log(launch);
+	// console.log(launch);
 
 	if (missile.isDefenseMissile) {
 		this.defenseMissiles.push(missile);
