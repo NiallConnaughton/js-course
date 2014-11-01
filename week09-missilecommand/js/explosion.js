@@ -1,6 +1,5 @@
-function Explosion(x, y) {
-	this.x = x;
-	this.y = y;
+function Explosion(location) {
+	this.location = location.clone();
 	this.size = 0;
 	this.completed = false;
 
@@ -17,15 +16,5 @@ Explosion.prototype.updatePosition = function(elapsed) {
 }
 
 Explosion.prototype.explodes = function(other) {
-	var distance = this.getDistance(this, other);
-
-	return distance <= this.size;
-}
-
-Explosion.prototype.getDistance = function(source, target) {
-	// Refactor this into something shared
-
-	var dx = target.x - source.x;
-	var dy = target.y - source.y;
-	return Math.sqrt(dx * dx + dy* dy);
+	return this.location.getDistanceTo(other.location) <= this.size;
 }

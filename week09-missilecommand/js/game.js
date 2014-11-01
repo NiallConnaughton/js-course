@@ -39,10 +39,19 @@ Game.prototype.replayLastGame = function() {
 	this.levels = new Array(lastGame.levels.length);
 	console.log('Replaying ' + this.levels.length + ' levels');
 
+	var launches = _.flatten(lastGame.levels.map(function(l) { return l.launches; }));
+
+	// find a better way of doing this
+	launches.forEach(function(l) {
+		$.extend(l.missile.source, Location.prototype);
+		$.extend(l.missile.target, Location.prototype);
+		$.extend(l.missile.location, Location.prototype);
+	});
+
 	var defenseLaunches = _.filter(lastGame.levels[0].launches, function (l) { return l.missile.isDefenseMissile; });
 	var mouseClicks = Rx.Observable.fromArray(defenseLaunches)
 								   .map(function (l) {
-									   	var target = { offsetX: l.missile.targetX, offsetY: l.missile.targetY };
+									   	var target = { offsetX: l.missile.target.x, offsetY: l.missile.target.y };
 									   	return Rx.Observable.return(target).delay(l.timeOffset);
 								   	});
 

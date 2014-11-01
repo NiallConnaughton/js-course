@@ -66,13 +66,13 @@ Renderer.prototype.renderBunker = function(bunker) {
 	ctx.font = "16pt Stencil";
 	ctx.fillStyle = missileCounterColour;
 	ctx.textAlign = "center";
-	ctx.fillText(bunker.remainingMissiles.toString(), bunker.x, bunker.y + 40);
+	ctx.fillText(bunker.remainingMissiles.toString(), bunker.location.x, bunker.location.y + 40);
 	ctx.restore();
 }
 
 Renderer.prototype.renderImage = function(img, gameObject) {
-	var top = gameObject.y - img.height / 2;
-	var left = gameObject.x - img.width / 2;
+	var top = gameObject.location.y - img.height / 2;
+	var left = gameObject.location.x - img.width / 2;
 	ctx.drawImage(img, left, top);
 }
 
@@ -107,7 +107,7 @@ Renderer.prototype.renderExplosion = function(explosion) {
 	var colour = '#FF' + nonRedColourHex + nonRedColourHex;
 
 	this.context.beginPath();
-	this.context.arc(explosion.x, explosion.y, explosion.size, 0, 2 * Math.PI, false);
+	this.context.arc(explosion.location.x, explosion.location.y, explosion.size, 0, 2 * Math.PI, false);
     this.context.fillStyle = colour;
     this.context.fill();
     this.context.lineWidth = 0;

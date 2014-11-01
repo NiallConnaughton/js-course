@@ -122,7 +122,7 @@ Level.prototype.isLevelLost = function() {
 
 Level.prototype.objectExploded = function(obj) {
 	obj.isAlive = false;
-	this.explosions.push(new Explosion(obj.x, obj.y));
+	this.explosions.push(new Explosion(obj.location));
 }
 
 Level.prototype.launchMissile = function(launch) {
@@ -139,27 +139,23 @@ Level.prototype.launchMissile = function(launch) {
 
 Level.prototype.createEnemyMissile = function() {
 	var sourceX = Math.random() * canvas.width;
+	var sourceLocation = new Location(sourceX, 0);
 
 	var targets = this.cities.concat(this.bunkers);
 	var target = targets[Math.floor(Math.random() * targets.length)];
 
-	var sourceLocation = new Location(sourceX, 0);
-	var targetLocation = new Location(target.x, target.y);
-
 	if (target)
-		return new Missile(sourceLocation, targetLocation, false);
+		return new Missile(sourceLocation, target.location, false);
 }
 
 Level.prototype.createDefenseMissile = function(target) {
 	var remainingBunkers = this.bunkers.filter(function(b) { return b.remainingMissiles > 0; });
 
 	if (_.any(remainingBunkers)) {
-		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
+		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.location.getDistanceTo(target)); });
 		closestBunker.fireMissile();
 
-		var sourceLocation = new Location(closestBunker.x, closestBunker.y);
-		var targetLocation = new Location(target.offsetX, target.offsetY);
-		return new Missile(sourceLocation, targetLocation, true);
+		return new Missile(closestBunker.location, target, true);
 	}
 }
 
@@ -191,6 +187,7 @@ Level.prototype.removeDeadObjects = function(items) {
 
 Level.prototype.getDefenseMissileLaunches = function() {
 	return this.userClicks
+			   .map(function(click) { return new Location(click.offsetX, click.offsetY); })
 			   .map(this.createDefenseMissile.bind(this))
 			   .takeWhile(function(m) { return m; })	
 }
