@@ -143,8 +143,11 @@ Level.prototype.createEnemyMissile = function() {
 	var targets = this.cities.concat(this.bunkers);
 	var target = targets[Math.floor(Math.random() * targets.length)];
 
+	var sourceLocation = new Location(sourceX, 0);
+	var targetLocation = new Location(target.x, target.y);
+
 	if (target)
-		return new Missile(sourceX, 0, target.x, target.y, false);
+		return new Missile(sourceLocation, targetLocation, false);
 }
 
 Level.prototype.createDefenseMissile = function(target) {
@@ -154,7 +157,9 @@ Level.prototype.createDefenseMissile = function(target) {
 		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.x - target.offsetX); });
 		closestBunker.fireMissile();
 
-		return new Missile(closestBunker.x, closestBunker.y, target.offsetX, target.offsetY, true);
+		var sourceLocation = new Location(closestBunker.x, closestBunker.y);
+		var targetLocation = new Location(target.offsetX, target.offsetY);
+		return new Missile(sourceLocation, targetLocation, true);
 	}
 }
 
@@ -217,7 +222,7 @@ Level.prototype.getReplayedEnemyMissileLaunches = function() {
 
 	var enemyMissiles = Rx.Observable.fromArray(enemyLaunches)
 									 .map(function (l) {
-									 	var missile = new Missile(l.missile.sourceX, l.missile.sourceY, l.missile.targetX, l.missile.targetY, false);
+									 	var missile = new Missile(l.missile.source, l.missile.target, false);
 									 	return Rx.Observable.return(missile).delay(l.timeOffset);
 								 	 })
 								 	 .mergeAll();

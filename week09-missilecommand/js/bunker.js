@@ -1,6 +1,5 @@
-function Bunker(x, y) {
-	this.x = x;
-	this.y = y;
+function Bunker(location) {
+	this.location location;
 	this.isAlive = true;
 }
 
