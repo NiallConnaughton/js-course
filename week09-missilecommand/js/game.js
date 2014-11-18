@@ -27,37 +27,42 @@ Game.prototype.startNewGame = function() {
 
 	this.hideDialogs($mainMenuDialog, $gameover);
 
-	this.level = new Level(1, this.updateRequests, this.mouseDowns);
+	var launchProvider = new LaunchProvider(this.mouseDowns);
+	this.level = new Level(1, this.updateRequests, this.mouseDowns, null, launchProvider);
 	this.startLevel();
 }
 
 Game.prototype.replayLastGame = function() {
 	this.hideDialogs($mainMenuDialog, $gameover);
-	var savedGame = sessionStorage.getItem('lastGame');
-	var lastGame = JSON.parse(savedGame);
+	var game = this.loadGame(sessionStorage.getItem('lastGame'));
 
-	this.levels = new Array(lastGame.levels.length);
+	var launchProvider = new ReplayLaunchProvider(game);
+
+	this.level = new Level(1, this.updateRequests, Rx.Observable.never(), null, launchProvider);
+	this.level.launches = game.levels[0].launches;
+	this.startLevel(true);
+}
+
+Game.prototype.loadGame = function(savedGame) {
+	var game = JSON.parse(savedGame);
+
+	this.levels = new Array(game.levels.length);
 	console.log('Replaying ' + this.levels.length + ' levels');
 
-	var launches = _.flatten(lastGame.levels.map(function(l) { return l.launches; }));
+	var launchedMissiles = _(game.levels)
+						.pluck('launches')
+						.flatten()
+						.pluck('missile');
+
+	var locations = launchedMissiles
+						.map(function (missile) { return [ missile.source, missile.target, missile.location ]})
+						.flatten()
+						.value();
 
 	// find a better way of doing this
-	launches.forEach(function(l) {
-		$.extend(l.missile.source, Location.prototype);
-		$.extend(l.missile.target, Location.prototype);
-		$.extend(l.missile.location, Location.prototype);
-	});
+	locations.forEach(function(l) { console.log(l); $.extend(l, Location.prototype); } );
 
-	var defenseLaunches = _.filter(lastGame.levels[0].launches, function (l) { return l.missile.isDefenseMissile; });
-	var mouseClicks = Rx.Observable.fromArray(defenseLaunches)
-								   .map(function (l) {
-									   	var target = { offsetX: l.missile.target.x, offsetY: l.missile.target.y };
-									   	return Rx.Observable.return(target).delay(l.timeOffset);
-								   	});
-
-	this.level = new Level(1, this.updateRequests, mouseClicks.mergeAll());
-	this.level.launches = lastGame.levels[0].launches;
-	this.startLevel(true);
+	return game;	
 }
 
 Game.prototype.startLevel = function(isReplay) {

@@ -2,27 +2,20 @@ Gameplay
 
 Design
 RX
-	game moves to next level if level won, shows game over if level lost
-
-inheritance of isAlive, x, y, etc
 
 UI
 drawing missile image instead of circle
 gameover dialog
 end of level dialog
 start of game dialog
+fix performance
 
 
 High Scores
 create high scores list
 ui to display high scores
-create node server
-request high scores from server
-push new score to server at end of game
 dialog to enter initials if new score is high score
 
-record enemy & defense missile launches during game
-	- source, target, timeoffset
 add record to game score object
 replay game object
 time compression to speed up replay

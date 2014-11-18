@@ -1,4 +1,4 @@
-function Level(level, updateRequests, userClicks, previousLevel) {
+function Level(level, updateRequests, userClicks, previousLevel, launchProvider) {
 	this.cities = [];
 	this.bunkers = [];
 	this.enemyMissiles = [];
@@ -10,6 +10,7 @@ function Level(level, updateRequests, userClicks, previousLevel) {
 	this.updateRequests = updateRequests;
 	this.userClicks = userClicks;
 	this.previousLevel = previousLevel;
+	this.launchProvider = launchProvider;
 
 	this.subscriptions = new Rx.CompositeDisposable();
 	this.levelFinished = this.getLevelFinished();
@@ -54,12 +55,12 @@ Level.prototype.initialize = function(isDemo) {
 	var detonations = this.getAllObjectUpdates(levelUpdates)
 						  .where(this.hasObjectExploded.bind(this));
 
-	var enemyMissiles = isDemo ? this.getReplayedEnemyMissileLaunches() : this.getEnemyMissileLaunches(totalEnemyMissiles);
-	var missileLaunches = enemyMissiles
-							  .merge(this.getDefenseMissileLaunches())
-							  .timestamp()
-							  .map(function (launch) { return { missile: launch.value, timeOffset: launch.timestamp - start }; })
-							  .do(this.recordMissileLaunch.bind(this));
+	// move the timestamp and mapping into launch provider
+	var missileLaunches = this.launchProvider.getLaunches(this)
+								  			 .timestamp()
+								  			 // .do(function (launch) { console.log(launch); })
+								  			 .map(function (launch) { return { missile: launch.value, timeOffset: launch.timestamp - start }; })
+								  			 .do(this.recordMissileLaunch.bind(this));
 
 	this.subscriptions.add(detonations.subscribe(this.objectExploded.bind(this)));
 	this.subscriptions.add(missileLaunches.subscribe(this.launchMissile.bind(this)));
@@ -106,7 +107,7 @@ Level.prototype.initializeFromPreviousLevel = function(previousLevel) {
 }
 
 Level.prototype.createNextLevel = function() {
-	return new Level(this.level + 1, this.updateRequests, this.userClicks, this);
+	return new Level(this.level + 1, this.updateRequests, this.userClicks, this, this.launchProvider);
 }
 
 Level.prototype.isLevelWon = function() {
@@ -137,26 +138,15 @@ Level.prototype.launchMissile = function(launch) {
 	}
 }
 
-Level.prototype.createEnemyMissile = function() {
-	var sourceX = Math.random() * canvas.width;
-	var sourceLocation = new Location(sourceX, 0);
-
-	var targets = this.cities.concat(this.bunkers);
-	var target = targets[Math.floor(Math.random() * targets.length)];
-
-	if (target)
-		return new Missile(sourceLocation, target.location, false);
-}
-
-Level.prototype.createDefenseMissile = function(target) {
+Level.prototype.findClosestBunker = function(target) {
 	var remainingBunkers = this.bunkers.filter(function(b) { return b.remainingMissiles > 0; });
 
+	var closestBunker;
 	if (_.any(remainingBunkers)) {
-		var closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.location.getDistanceTo(target)); });
-		closestBunker.fireMissile();
-
-		return new Missile(closestBunker.location, target, true);
+		closestBunker = _.min(remainingBunkers, function(b) { return Math.abs(b.location.getDistanceTo(target)); });
 	}
+
+	return closestBunker;
 }
 
 Level.prototype.updatePositions = function(elapsed) {
@@ -183,46 +173,4 @@ Level.prototype.removeDeadObjects = function(items) {
 			items.splice(i, 1);
 		}
 	}
-}
-
-Level.prototype.getDefenseMissileLaunches = function() {
-	return this.userClicks
-			   .map(function(click) { return new Location(click.offsetX, click.offsetY); })
-			   .map(this.createDefenseMissile.bind(this))
-			   .takeWhile(function(m) { return m; })	
-}
-
-Level.prototype.getEnemyMissileLaunches = function(totalEnemyMissiles) {
-	// level should last around 15 seconds
-
-	var averageGap = 15000 / totalEnemyMissiles;
-
-	console.log('level ' + this.level + ': ' + totalEnemyMissiles + ' missiles, launched every ' + averageGap + 'ms.');
-
-	var delays = [];
-	for (var i = 0; i < totalEnemyMissiles; i++) {
-		delays.push(Math.random() * averageGap * 2);
-	}
-
-	// var self = this;
-	// take the launch times and map them to observable timers that will fire at the launch time
-	return Rx.Observable.for(delays, function(d) { return Rx.Observable.timer(d); })
-						.map(this.createEnemyMissile.bind(this))
-						.takeWhile(function(m) { return m; });
-	
-	// for great justice, replace the line above with this. No idea why it does that.
-	// return Rx.Observable.for(delays, Rx.Observable.timer);
-}
-
-Level.prototype.getReplayedEnemyMissileLaunches = function() {
-	var enemyLaunches = _.filter(this.launches, function(l) { return !l.missile.isDefenseMissile; });
-
-	var enemyMissiles = Rx.Observable.fromArray(enemyLaunches)
-									 .map(function (l) {
-									 	var missile = new Missile(l.missile.source, l.missile.target, false);
-									 	return Rx.Observable.return(missile).delay(l.timeOffset);
-								 	 })
-								 	 .mergeAll();
-
-	return enemyMissiles;
 }
