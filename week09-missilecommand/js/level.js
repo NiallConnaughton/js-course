@@ -1,4 +1,4 @@
-function Level(level, updateRequests, userClicks, previousLevel, launchProvider) {
+function Level(level, updateRequests, previousLevel, launchProvider) {
 	this.cities = [];
 	this.bunkers = [];
 	this.enemyMissiles = [];
@@ -8,7 +8,6 @@ function Level(level, updateRequests, userClicks, previousLevel, launchProvider)
 
 	this.level = level;
 	this.updateRequests = updateRequests;
-	this.userClicks = userClicks;
 	this.previousLevel = previousLevel;
 	this.launchProvider = launchProvider;
 
@@ -107,7 +106,7 @@ Level.prototype.initializeFromPreviousLevel = function(previousLevel) {
 }
 
 Level.prototype.createNextLevel = function() {
-	return new Level(this.level + 1, this.updateRequests, this.userClicks, this, this.launchProvider);
+	return new Level(this.level + 1, this.updateRequests, this, this.launchProvider);
 }
 
 Level.prototype.isLevelWon = function() {

@@ -28,19 +28,21 @@ Game.prototype.startNewGame = function() {
 	this.hideDialogs($mainMenuDialog, $gameover);
 
 	var launchProvider = new LaunchProvider(this.mouseDowns);
-	this.level = new Level(1, this.updateRequests, this.mouseDowns, null, launchProvider);
+	this.level = new Level(1, this.updateRequests, null, launchProvider);
 	this.startLevel();
 }
 
 Game.prototype.replayLastGame = function() {
 	this.hideDialogs($mainMenuDialog, $gameover);
 	var game = this.loadGame(sessionStorage.getItem('lastGame'));
+	this.levels = game.levels;
+	this.isReplay = true;
 
 	var launchProvider = new ReplayLaunchProvider(game);
 
-	this.level = new Level(1, this.updateRequests, Rx.Observable.never(), null, launchProvider);
+	this.level = new Level(1, this.updateRequests, null, launchProvider);
 	this.level.launches = game.levels[0].launches;
-	this.startLevel(true);
+	this.startLevel();
 }
 
 Game.prototype.loadGame = function(savedGame) {
@@ -59,14 +61,14 @@ Game.prototype.loadGame = function(savedGame) {
 						.flatten()
 						.value();
 
-	// find a better way of doing this
-	locations.forEach(function(l) { console.log(l); $.extend(l, Location.prototype); } );
+	// find a better way of doing this	
+	locations.forEach(function(l) { $.extend(l, Location.prototype); } );
 
 	return game;	
 }
 
-Game.prototype.startLevel = function(isReplay) {
-	this.level.initialize(isReplay);
+Game.prototype.startLevel = function() {
+	this.level.initialize(this.isReplay);
 
 	this.updateRequests.takeUntil(this.level.levelFinished)
 					   .subscribe(this.render.bind(this));
@@ -106,7 +108,12 @@ Game.prototype.getSavedGame = function() {
 }
 
 Game.prototype.levelUp = function() {
-	this.level = this.level.createNextLevel();
+	var nextLevel = this.level.createNextLevel()
+
+	if (this.isReplay) {
+		nextLevel.launches = this.levels[this.level.level].launches;
+	}
+	this.level = nextLevel;
 	this.startLevel();
 }
 
