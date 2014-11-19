@@ -25,7 +25,7 @@ ReplayLaunchProvider.prototype.getReplayedLaunches = function(level) {
 	var enemyMissiles = Rx.Observable.fromArray(level.launches)
 									 .map(function (l) {
 									 	var missile = new Missile(l.missile.source, l.missile.target, l.missile.isDefenseMissile);
-									 	return Rx.Observable.return(missile).delay(l.timeOffset);
+									 	return Rx.Observable.return(missile).delay(l.timeOffset / demomodeSpeedup);
 								 	 })
 								 	 .mergeAll();
 

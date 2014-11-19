@@ -5,6 +5,7 @@ var $mainMenuDialog = $('#mainMenu');
 var $startGameButton = $('#startNewGameButton');
 var $replayLastGameButton = $('#replayLastGameButton');
 var ctx = canvas.getContext('2d');
+var demomodeSpeedup = 3;
 
 function Game() {
 	this.renderer = new Renderer();
@@ -40,7 +41,9 @@ Game.prototype.replayLastGame = function() {
 
 	var launchProvider = new ReplayLaunchProvider(game);
 
-	this.level = new Level(1, this.updateRequests, null, launchProvider);
+	var updateRequests = this.updateRequests.map(function(elapsed) { return elapsed * demomodeSpeedup; });
+
+	this.level = new Level(1, updateRequests, null, launchProvider);
 	this.level.launches = game.levels[0].launches;
 	this.startLevel();
 }
