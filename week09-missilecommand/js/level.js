@@ -33,7 +33,6 @@ Level.prototype.getLevelFinished = function() {
 
 Level.prototype.initialize = function(isDemo) {
 	this.isDemo = isDemo;
-	var start = Date.now();
 
 	if (this.previousLevel) {
 		this.initializeFromPreviousLevel(this.previousLevel);
@@ -57,9 +56,10 @@ Level.prototype.initialize = function(isDemo) {
 	// move the timestamp and mapping into launch provider
 	var missileLaunches = this.launchProvider.getLaunches(this)
 								  			 .timestamp()
-								  			 // .do(function (launch) { console.log(launch); })
 								  			 .map(function (launch) { return { missile: launch.value, timeOffset: launch.timestamp - start }; })
 								  			 .do(this.recordMissileLaunch.bind(this));
+
+	var start = Date.now();
 
 	this.subscriptions.add(detonations.subscribe(this.objectExploded.bind(this)));
 	this.subscriptions.add(missileLaunches.subscribe(this.launchMissile.bind(this)));
@@ -122,6 +122,17 @@ Level.prototype.isLevelLost = function() {
 
 Level.prototype.objectExploded = function(obj) {
 	obj.isAlive = false;
+
+	// nasty hack to make game replays more reliable
+	// due to timing mismatches between original and replay,
+	// sometimes an enemy missile will slip past an explosion
+	// that killed it in the original game.
+	// by changing the target of the missile when it dies,
+	// we make that missile explode at the point it was originally
+	// hit by the explosion, even if it misses in the replay.
+	if (obj.target)
+		obj.target = obj.location;
+
 	this.explosions.push(new Explosion(obj.location));
 }
 

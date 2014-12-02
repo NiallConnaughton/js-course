@@ -23,6 +23,7 @@ Game.prototype.showMainMenu = function() {
 }
 
 Game.prototype.startNewGame = function() {
+	this.isReplay = false;
 	this.levels = [];
 	this.score = 0;
 
@@ -34,6 +35,7 @@ Game.prototype.startNewGame = function() {
 }
 
 Game.prototype.replayLastGame = function() {
+	this.score = 0;
 	this.hideDialogs($mainMenuDialog, $gameover);
 	var game = this.loadGame(sessionStorage.getItem('lastGame'));
 	this.levels = game.levels;
@@ -96,12 +98,17 @@ Game.prototype.levelFinished = function(levelWon) {
 	}
 	else {
 		this.showDialogs($gameover);
-		Rx.Observable.timer(10000).subscribe(this.showMainMenu.bind(this));
-		$('#finalScore').html(this.score);
-		$('#finalLevel').html(this.level.level);
+		if (!this.isReplay) {
+			Rx.Observable.timer(10000).subscribe(this.showMainMenu.bind(this));
+			$('#finalScore').html(this.score);
+			$('#finalLevel').html(this.level.level);
 
-		var savedGame = this.getSavedGame();
-		sessionStorage.setItem('lastGame', JSON.stringify(savedGame));
+			var savedGame = this.getSavedGame();
+			sessionStorage.setItem('lastGame', JSON.stringify(savedGame));
+		}
+		else {
+			this.showMainMenu();
+		}
 	}
 }
 
