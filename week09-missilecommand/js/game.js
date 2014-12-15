@@ -7,6 +7,7 @@ var $startGameButton = $('#startNewGameButton');
 var $replayLastGameButton = $('#replayLastGameButton');
 var ctx = canvas.getContext('2d');
 var demomodeSpeedup = 3;
+var dialogs = [$gameover, $newHighScore, $mainMenuDialog];
 
 function Game() {
 	this.renderer = new Renderer();
@@ -18,17 +19,12 @@ function Game() {
 	this.centreElement($canvas);
 }
 
-Game.prototype.showMainMenu = function() {
-	this.showDialogs($mainMenuDialog);
-	this.hideDialogs($gameover, $newHighScore);
-}
-
 Game.prototype.startNewGame = function() {
 	this.isReplay = false;
 	this.levels = [];
 	this.score = 0;
 
-	this.hideDialogs($mainMenuDialog, $gameover);
+	this.hideDialogs();
 
 	var launchProvider = new LaunchProvider(this.mouseDowns);
 	this.level = new Level(1, this.updateRequests, null, launchProvider);
@@ -37,7 +33,7 @@ Game.prototype.startNewGame = function() {
 
 Game.prototype.replayLastGame = function() {
 	this.score = 0;
-	this.hideDialogs($mainMenuDialog, $gameover);
+	this.hideDialogs();
 	var highScores = this.loadHighScores();
 	var game = highScores[0];
 	// var game = this.loadGame(sessionStorage.getItem('lastGame'));
@@ -101,27 +97,12 @@ Game.prototype.levelFinished = function(levelWon) {
 	}
 	else {
 		if (!this.isReplay) {
-			this.showDialogs($newHighScore);
-		// this.showDialogs($gameover);
-			// Rx.Observable.timer(10000).subscribe(this.showMainMenu.bind(this));
-			// $('#finalScore').html(this.score);
-			// $('#finalLevel').html(this.level.level);
-
-			var self = this;
-			var $highScoreName = $('#highScoreName');
-			$highScoreName.keypress(function (e) {
-				if(e.which == 13) {
-					var savedGame = self.getSavedGame($newHighScore.val());
-					var savedGames = self.loadHighScores();
-					savedGames.push(savedGame);
-					savedGames = _.sortBy(savedGames, 'score').reverse();
-					savedGames = _.take(savedGames, 5);
-
-					var savedGamesJson = JSON.stringify(savedGames);
-					sessionStorage.setItem('highScores', savedGamesJson);
-					self.showMainMenu();
-				}
-			})
+			var savedGames = this.loadHighScores();
+			var lowestHighScore = _(savedGames).last();
+			if (lowestHighScore && savedGames.length === 5 && this.score <= lowestHighScore.score)
+				this.showGameOver();
+			else
+				this.showNewHighScore(savedGames);
 		}
 		else {
 			this.showMainMenu();
@@ -171,17 +152,46 @@ Game.prototype.getUpdateRequests = function() {
 	return updateRequests.zip(updateRequests.skip(1), function(t1, t2) { return t2 - t1; });
 }
 
-Game.prototype.showDialogs = function() {
-	for (var i = 0; i < arguments.length; i++) {
-		this.centreElement(arguments[i]);
-		arguments[i].removeClass('dialogHidden');
-	};
+
+Game.prototype.showMainMenu = function() {
+	this.showDialog($mainMenuDialog);
+}
+
+Game.prototype.showGameOver = function() {
+	this.showDialog($gameover);
+	Rx.Observable.timer(10000).subscribe(this.showMainMenu.bind(this));
+	$('#finalScore').html(this.score);
+	$('#finalLevel').html(this.level.level);
+}
+
+Game.prototype.showNewHighScore = function(savedGames) {
+	this.showDialog($newHighScore);
+	var $highScoreName = $('#highScoreName');
+	$highScoreName.focus();
+
+	var self = this;
+	$highScoreName.keypress(function (e) {
+		if(e.which == 13) {
+			var savedGame = self.getSavedGame($newHighScore.val());
+			savedGames.push(savedGame);
+			savedGames = _.sortBy(savedGames, 'score').reverse();
+			savedGames = _.take(savedGames, 5);
+
+			var savedGamesJson = JSON.stringify(savedGames);
+			sessionStorage.setItem('highScores', savedGamesJson);
+			self.showGameOver();
+		}
+	});
+}
+
+Game.prototype.showDialog = function(dialog) {
+	this.hideDialogs();
+	dialog.removeClass('dialogHidden');
+	this.centreElement(dialog);
 }
 
 Game.prototype.hideDialogs = function() {
-	for (var i = 0; i < arguments.length; i++) {
-		arguments[i].addClass('dialogHidden');
-	};
+	dialogs.forEach(function (d) { d.addClass('dialogHidden'); });
 }
 
 Game.prototype.centreElement = function($element) {
