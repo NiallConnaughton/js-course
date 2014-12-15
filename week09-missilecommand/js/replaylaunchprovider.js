@@ -3,22 +3,22 @@ function ReplayLaunchProvider(replayGame) {
 }
 
 ReplayLaunchProvider.prototype.getLaunches = function(level) {
-	return this.getReplayedDefenseLaunches(level).merge(this.getReplayedEnemyMissileLaunches(level));
+	var allLaunches = this.getReplayedLaunches(level);
+
+	return this.getReplayedDefenseLaunches(level, allLaunches)
+				.merge(this.getReplayedEnemyMissileLaunches(level, allLaunches));
 }
 
-ReplayLaunchProvider.prototype.getReplayedDefenseLaunches = function(level) {
-	var defenseLaunches = this.getReplayedLaunches(level)
-							  .where(function(missile) { return missile.isDefenseMissile; })
-							  .do(function(missile) {
-								   		var bunker = level.findClosestBunker(missile.source);
-								   		bunker.fireMissile();
-									});
-
-	return defenseLaunches;
+ReplayLaunchProvider.prototype.getReplayedDefenseLaunches = function(level, launches) {
+	return launches.where(function(missile) { return missile.isDefenseMissile; })
+					.do(function(missile) {
+						var bunker = level.findClosestBunker(missile.source);
+						bunker.fireMissile();
+					});
 }
 
-ReplayLaunchProvider.prototype.getReplayedEnemyMissileLaunches = function(level) {
-	return this.getReplayedLaunches(level).where(function(missile) { return !missile.isDefenseMissile; });
+ReplayLaunchProvider.prototype.getReplayedEnemyMissileLaunches = function(level, launches) {
+	return launches.where(function(missile) { return !missile.isDefenseMissile; });
 }
 
 ReplayLaunchProvider.prototype.getReplayedLaunches = function(level) {
@@ -27,7 +27,8 @@ ReplayLaunchProvider.prototype.getReplayedLaunches = function(level) {
 									 	var missile = new Missile(l.missile.source, l.missile.target, l.missile.isDefenseMissile);
 									 	return Rx.Observable.return(missile).delay(l.timeOffset / demomodeSpeedup);
 								 	 })
-								 	 .mergeAll();
+								 	 .mergeAll()
+								 	 .share();
 
 	return enemyMissiles;
 }

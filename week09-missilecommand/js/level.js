@@ -59,10 +59,10 @@ Level.prototype.initialize = function(isDemo) {
 								  			 .map(function (launch) { return { missile: launch.value, timeOffset: launch.timestamp - start }; })
 								  			 .do(this.recordMissileLaunch.bind(this));
 
-	var start = Date.now();
-
 	this.subscriptions.add(detonations.subscribe(this.objectExploded.bind(this)));
 	this.subscriptions.add(missileLaunches.subscribe(this.launchMissile.bind(this)));
+
+	var start = Date.now();
 }
 
 Level.prototype.recordMissileLaunch = function(launch) {
@@ -85,6 +85,9 @@ Level.prototype.hasObjectExploded = function(obj) {
 	if (obj.reachedTarget && obj.reachedTarget()) {
 		return true;
 	}
+
+	if (this.isDemo && obj instanceof Missile)
+		return false;
 
 	// Defense missiles don't get destroyed by explosions, as this makes the game very hard to play (this matches the original)
 	return !obj.isDefenseMissile && _.any(this.explosions, function(e) { return e.explodes(obj); });

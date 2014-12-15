@@ -18,7 +18,6 @@ dialog to enter initials if new score is high score
 
 add record to game score object
 replay game object
-time compression to speed up replay
 add play button to high scores to replay the game
 
 demo mode chooses random high score to replay before game starts
